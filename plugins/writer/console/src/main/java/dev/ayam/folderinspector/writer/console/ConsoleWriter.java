@@ -1,8 +1,10 @@
 package dev.ayam.folderinspector.writer.console;
 
-import dev.ayam.folderinspector.core.Writer;
+import dev.ayam.folderinspector.core.plugin.Writer;
 import dev.ayam.folderinspector.core.model.Item;
-import java.nio.file.attribute.AclEntry;
+import dev.ayam.folderinspector.core.model.AclItem;
+import dev.ayam.folderinspector.core.utility.DateTimeUtil;
+import dev.ayam.folderinspector.writer.console.utility.StringResource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,22 +19,20 @@ public class ConsoleWriter implements Writer {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsoleWriter.class);
 
-    private static final List<String> HEADERS = Arrays.asList(
-            "Absolute Path", "Relative Path", "Type", "Size",
-            "Last Modified", "Created", "Owner", "Group", "Permissions", "ACLs");
+    private static final List<String> HEADERS = StringResource.TABLE_HEADERS;
 
     @Override
     public String write(List<Item> items) {
-        logger.debug("Formatting {} items to Console table", items.size());
+        logger.debug(StringResource.LOG_FORMATTING, items.size());
         if (items.isEmpty()) {
-            return "No items found.";
+            return StringResource.NO_ITEMS_FOUND;
         }
         return formatTable(items);
     }
 
     @Override
     public String getName() {
-        return "console";
+        return StringResource.NAME;
     }
 
     private String formatTable(List<Item> items) {
@@ -45,8 +45,8 @@ public class ConsoleWriter implements Writer {
                     item.relativePath(),
                     item.type(),
                     String.valueOf(item.size()),
-                    String.valueOf(item.lastModified()),
-                    String.valueOf(item.created()),
+                    DateTimeUtil.format(item.lastModified()),
+                    DateTimeUtil.format(item.created()),
                     item.owner(),
                     item.group(),
                     item.permissions(),
@@ -93,11 +93,13 @@ public class ConsoleWriter implements Writer {
         sb.append(System.lineSeparator());
     }
 
-    private String formatAcls(List<AclEntry> acls) {
+    private String formatAcls(List<AclItem> acls) {
         if (acls == null || acls.isEmpty())
             return "";
         return acls.stream()
-                .map(AclEntry::toString)
+                .map(acl -> String.format("%s:[%s]:[%s]", acl.name(),
+                        String.join(",", acl.permissions()),
+                        String.join(",", acl.flags())))
                 .collect(Collectors.joining("; "));
     }
 }

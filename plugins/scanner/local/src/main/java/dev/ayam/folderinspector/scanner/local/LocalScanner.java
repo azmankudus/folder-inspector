@@ -1,7 +1,9 @@
 package dev.ayam.folderinspector.scanner.local;
 
-import dev.ayam.folderinspector.core.Scanner;
+import dev.ayam.folderinspector.core.plugin.Scanner;
+import dev.ayam.folderinspector.core.model.AclItem;
 import dev.ayam.folderinspector.core.model.Item;
+import dev.ayam.folderinspector.scanner.local.utility.StringResource;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -28,7 +30,7 @@ public class LocalScanner implements Scanner {
      */
     @Override
     public List<Item> scan(Path rootPath) throws IOException {
-        logger.debug("Starting scan of directory: {}", rootPath);
+        logger.debug(StringResource.STARTING_SCAN, rootPath);
         List<Item> items = new ArrayList<>();
 
         Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
@@ -48,14 +50,14 @@ public class LocalScanner implements Scanner {
 
             @Override
             public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                logger.warn("Failed to access file/directory: {} - {}", file, exc.getMessage());
+                logger.warn(StringResource.ERROR_ACCESS_FAILED, file, exc.getMessage());
                 // We should probably rely on a Notifier here, but for now system.err or logger
                 // is within scope of a local scanner logic handling issues
                 return FileVisitResult.CONTINUE;
             }
         });
 
-        logger.info("Scan completed. Found {} items.", items.size());
+        logger.info(StringResource.SCAN_COMPLETED, items.size());
         return items;
     }
 
@@ -65,15 +67,16 @@ public class LocalScanner implements Scanner {
             relativePath = path.getFileName().toString();
         }
 
-        String type = basicAttrs.isDirectory() ? "Directory" : basicAttrs.isSymbolicLink() ? "Symbolic Link" : "File";
+        String type = basicAttrs.isDirectory() ? StringResource.FILE_TYPE_DIRECTORY
+                : basicAttrs.isSymbolicLink() ? StringResource.FILE_TYPE_SYMLINK : StringResource.FILE_TYPE_FILE;
 
         long size = basicAttrs.isDirectory() ? 0 : basicAttrs.size();
         Instant lastModified = basicAttrs.lastModifiedTime().toInstant();
         Instant created = basicAttrs.creationTime().toInstant();
 
-        String owner = "N/A";
-        String group = "N/A";
-        String permissions = "N/A";
+        String owner = StringResource.NA;
+        String group = StringResource.NA;
+        String permissions = StringResource.NA;
 
         try {
             PosixFileAttributeView posixView = Files.getFileAttributeView(path, PosixFileAttributeView.class,
@@ -91,18 +94,27 @@ public class LocalScanner implements Scanner {
                 }
             }
         } catch (Exception e) {
-            logger.trace("Failed to retrieve POSIX/Owner attributes for {}: {}", path, e.getMessage());
+            logger.trace(StringResource.ERROR_POSIX_FAILED, path, e.getMessage());
         }
 
-        List<AclEntry> acls = null;
+        List<AclItem> acls = null;
         try {
             AclFileAttributeView aclView = Files.getFileAttributeView(path, AclFileAttributeView.class,
                     LinkOption.NOFOLLOW_LINKS);
             if (aclView != null) {
-                acls = aclView.getAcl();
+                List<AclEntry> rawAcls = aclView.getAcl();
+                if (rawAcls != null) {
+                    acls = new ArrayList<>();
+                    for (AclEntry entry : rawAcls) {
+                        String name = entry.principal().getName();
+                        List<String> aclPermissions = entry.permissions().stream().map(Object::toString).toList();
+                        List<String> aclFlags = entry.flags().stream().map(Object::toString).toList();
+                        acls.add(new AclItem(name, aclPermissions, aclFlags));
+                    }
+                }
             }
         } catch (Exception e) {
-            logger.trace("Failed to retrieve ACL attributes for {}: {}", path, e.getMessage());
+            logger.trace(StringResource.ERROR_ACL_FAILED, path, e.getMessage());
         }
 
         return new Item(
@@ -120,6 +132,6 @@ public class LocalScanner implements Scanner {
 
     @Override
     public String getName() {
-        return "local";
+        return StringResource.NAME;
     }
 }

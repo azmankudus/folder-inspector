@@ -1,4 +1,4 @@
-package dev.ayam.folderinspector.core;
+package dev.ayam.folderinspector.core.plugin;
 
 import dev.ayam.folderinspector.core.model.Item;
 import java.util.List;

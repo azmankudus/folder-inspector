@@ -1,5 +1,10 @@
 package dev.ayam.folderinspector.core;
 
+import dev.ayam.folderinspector.core.plugin.Launcher;
+import dev.ayam.folderinspector.core.plugin.Notifier;
+import dev.ayam.folderinspector.core.plugin.Scanner;
+import dev.ayam.folderinspector.core.plugin.Writer;
+import dev.ayam.folderinspector.core.utility.StringResource;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
 import java.util.stream.StreamSupport;
@@ -16,28 +21,28 @@ import picocli.CommandLine.ParseResult;
  * Main entry point for the Folder Inspector application.
  * Manages plugin selection and execution.
  */
-@Command(name = "folder-inspector", mixinStandardHelpOptions = true, version = "1.0", description = "Scans a folder and reports file metadata.")
+@Command(name = "folder-inspector", resourceBundle = "strings_core", mixinStandardHelpOptions = true, version = "1.0")
 public class Main implements Callable<Integer> {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-  @Parameters(index = "0", description = "The folder to scan.", defaultValue = ".")
+  @Parameters(index = "0", descriptionKey = "folder-inspector.folderPath.description", defaultValue = ".")
   private String folderPath;
 
   @Option(names = { "-l",
-      "--launcher" }, description = "Launcher implementation (e.g., console).", defaultValue = "console")
+      "--launcher" }, descriptionKey = "folder-inspector.launcher.description", defaultValue = "console")
   private String launcherName;
 
   @Option(names = { "-s",
-      "--scanner" }, description = "Scanner implementation (e.g., local).", defaultValue = "local")
+      "--scanner" }, descriptionKey = "folder-inspector.scanner.description", defaultValue = "local")
   private String scannerName;
 
   @Option(names = { "-w",
-      "--writer" }, description = "Writer implementation (e.g., console, csv).", defaultValue = "console")
+      "--writer" }, descriptionKey = "folder-inspector.writer.description", defaultValue = "console")
   private String writerName;
 
   @Option(names = { "-n",
-      "--notifier" }, description = "Notifier implementation (e.g., console).", defaultValue = "console")
+      "--notifier" }, descriptionKey = "folder-inspector.notifier.description", defaultValue = "console")
   private String notifierName;
 
   public static void main(String[] args) {
@@ -53,11 +58,11 @@ public class Main implements Callable<Integer> {
 
   private static String getAvailablePlugins() {
     StringBuilder sb = new StringBuilder();
-    sb.append("\nAvailable Plugins:\n");
-    sb.append(String.format("  Launchers: %s\n", listServiceNames(Launcher.class)));
-    sb.append(String.format("  Scanners:  %s\n", listServiceNames(Scanner.class)));
-    sb.append(String.format("  Writers:   %s\n", listServiceNames(Writer.class)));
-    sb.append(String.format("  Notifiers: %s\n", listServiceNames(Notifier.class)));
+    sb.append(StringResource.AVAILABLE_PLUGINS_HEADER);
+    sb.append(String.format(StringResource.LAUNCHERS_LABEL, listServiceNames(Launcher.class)));
+    sb.append(String.format(StringResource.SCANNERS_LABEL, listServiceNames(Scanner.class)));
+    sb.append(String.format(StringResource.WRITERS_LABEL, listServiceNames(Writer.class)));
+    sb.append(String.format(StringResource.NOTIFIERS_LABEL, listServiceNames(Notifier.class)));
     return sb.toString();
   }
 
@@ -67,42 +72,42 @@ public class Main implements Callable<Integer> {
           try {
             return (String) serviceClass.getMethod("getName").invoke(s);
           } catch (Exception e) {
-            return "unknown";
+            return StringResource.UNKNOWN_PLUGIN;
           }
         })
         .reduce((a, b) -> a + ", " + b)
-        .orElse("none");
+        .orElse(StringResource.NONE_PLUGIN);
   }
 
   @Override
   public Integer call() {
-    logger.debug("Bootstrapping application...");
+    logger.debug(StringResource.BOOTSTRAPPING_APP);
 
     Notifier notifier = loadService(Notifier.class, notifierName);
     if (notifier == null) {
-      System.err.println("Error: No Notifier found with name: " + notifierName);
+      System.err.println(StringResource.ERROR_PREFIX + StringResource.ERR_NOTIFIER_NOT_FOUND + notifierName);
       return 1;
     }
 
     Scanner scanner = loadService(Scanner.class, scannerName);
     if (scanner == null) {
-      notifier.notifyError("Error: No Scanner found with name: " + scannerName);
+      notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_SCANNER_NOT_FOUND + scannerName);
       return 1;
     }
 
     Writer writer = loadService(Writer.class, writerName);
     if (writer == null) {
-      notifier.notifyError("Error: No Writer found with name: " + writerName);
+      notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_WRITER_NOT_FOUND + writerName);
       return 1;
     }
 
     Launcher launcher = loadService(Launcher.class, launcherName);
     if (launcher == null) {
-      notifier.notifyError("Error: No Launcher found with name: " + launcherName);
+      notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_LAUNCHER_NOT_FOUND + launcherName);
       return 1;
     }
 
-    logger.debug("Plugins loaded: Launcher={}, Scanner={}, Writer={}, Notifier={}",
+    logger.debug(StringResource.PLUGINS_LOADED,
         launcherName, scannerName, writerName, notifierName);
 
     return launcher.launch(scanner, writer, notifier, folderPath);
@@ -115,7 +120,7 @@ public class Main implements Callable<Integer> {
             String serviceName = (String) serviceClass.getMethod("getName").invoke(s);
             return serviceName.equalsIgnoreCase(name);
           } catch (Exception e) {
-            logger.warn("Failed to get name for service: {}", s.getClass().getName(), e);
+            logger.warn(StringResource.ERR_SERVICE_NAME_FAILED, s.getClass().getName(), e);
             return false;
           }
         })
@@ -126,7 +131,7 @@ public class Main implements Callable<Integer> {
   static class ExceptionHandler implements IExecutionExceptionHandler {
     @Override
     public int handleExecutionException(Exception ex, CommandLine commandLine, ParseResult parseResult) {
-      System.err.println("Error: " + ex.getMessage());
+      System.err.println(StringResource.ERR_EXECUTION_FAILED + ex.getMessage());
       ex.printStackTrace();
       return 2;
     }

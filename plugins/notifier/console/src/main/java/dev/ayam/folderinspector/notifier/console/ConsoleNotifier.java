@@ -1,8 +1,10 @@
 package dev.ayam.folderinspector.notifier.console;
 
-import dev.ayam.folderinspector.core.Notifier;
+import dev.ayam.folderinspector.core.plugin.Notifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.ayam.folderinspector.notifier.console.utility.StringResource;
 
 public class ConsoleNotifier implements Notifier {
     private static final Logger logger = LoggerFactory.getLogger(ConsoleNotifier.class);
@@ -20,6 +22,6 @@ public class ConsoleNotifier implements Notifier {
 
     @Override
     public String getName() {
-        return "console";
+        return StringResource.NAME;
     }
 }

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import dev.ayam.folderinspector.core.Writer;
+import dev.ayam.folderinspector.writer.csv.utility.StringResource;
+import dev.ayam.folderinspector.core.plugin.Writer;
 import dev.ayam.folderinspector.core.model.Item;
+import dev.ayam.folderinspector.core.utility.DateTimeUtil;
 import java.io.StringWriter;
-import java.nio.file.attribute.AclEntry;
+import dev.ayam.folderinspector.core.model.AclItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,24 +34,39 @@ public class CsvWriter implements Writer {
                         item.relativePath(),
                         item.type(),
                         item.size(),
-                        String.valueOf(item.lastModified()),
-                        String.valueOf(item.created()),
+                        DateTimeUtil.format(item.lastModified()),
+                        DateTimeUtil.format(item.created()),
                         item.owner(),
                         item.group(),
                         item.permissions(),
                         formatAcls(item.acls())));
             }
 
-            CsvMapper mapper = new CsvMapper();
-            CsvSchema schema = mapper.schemaFor(CsvItem.class).withHeader();
-
             StringWriter writer = new StringWriter();
+
+            // Write Header manually
+            writer.write(String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s%n",
+                    StringResource.HEADER_ABSOLUTE_PATH,
+                    StringResource.HEADER_RELATIVE_PATH,
+                    StringResource.HEADER_TYPE,
+                    StringResource.HEADER_SIZE,
+                    StringResource.HEADER_LAST_MODIFIED,
+                    StringResource.HEADER_CREATED,
+                    StringResource.HEADER_OWNER,
+                    StringResource.HEADER_GROUP,
+                    StringResource.HEADER_PERMISSIONS,
+                    StringResource.HEADER_ACLS));
+
+            CsvMapper mapper = new CsvMapper();
+            // Use schema from class but disable header output (since we wrote it manually)
+            CsvSchema schema = mapper.schemaFor(CsvItem.class).withoutHeader();
+
             mapper.writer(schema).writeValue(writer, csvItems);
             return writer.toString();
 
         } catch (Exception e) {
-            logger.error("Error writing CSV", e);
-            return "Error generating CSV output: " + e.getMessage();
+            logger.error(StringResource.ERROR_WRITING_CSV, e);
+            return StringResource.ERROR_GENERATING_OUTPUT + e.getMessage();
         }
     }
 
@@ -58,38 +75,40 @@ public class CsvWriter implements Writer {
         return "csv";
     }
 
-    private String formatAcls(List<AclEntry> acls) {
+    private String formatAcls(List<AclItem> acls) {
         if (acls == null || acls.isEmpty())
             return "";
         return acls.stream()
-                .map(AclEntry::toString)
+                .map(acl -> String.format("%s:[%s]:[%s]", acl.name(),
+                        String.join(",", acl.permissions()),
+                        String.join(",", acl.flags())))
                 .collect(Collectors.joining("; "));
     }
 
     @JsonPropertyOrder({
-            "Absolute Path", "Relative Path", "Type", "Size",
-            "Last Modified", "Created", "Owner", "Group", "Permissions", "ACLs"
+            "absolutePath", "relativePath", "type", "size",
+            "lastModified", "created", "owner", "group", "permissions", "acls"
     })
     private static class CsvItem {
-        @JsonProperty("Absolute Path")
+        @JsonProperty
         public String absolutePath;
-        @JsonProperty("Relative Path")
+        @JsonProperty
         public String relativePath;
-        @JsonProperty("Type")
+        @JsonProperty
         public String type;
-        @JsonProperty("Size")
-        public long size;
-        @JsonProperty("Last Modified")
+        @JsonProperty
+        public String size;
+        @JsonProperty
         public String lastModified;
-        @JsonProperty("Created")
+        @JsonProperty
         public String created;
-        @JsonProperty("Owner")
+        @JsonProperty
         public String owner;
-        @JsonProperty("Group")
+        @JsonProperty
         public String group;
-        @JsonProperty("Permissions")
+        @JsonProperty
         public String permissions;
-        @JsonProperty("ACLs")
+        @JsonProperty
         public String acls;
 
         public CsvItem(String absolutePath, String relativePath, String type, long size, String lastModified,
@@ -97,7 +116,7 @@ public class CsvWriter implements Writer {
             this.absolutePath = absolutePath;
             this.relativePath = relativePath;
             this.type = type;
-            this.size = size;
+            this.size = String.valueOf(size);
             this.lastModified = lastModified;
             this.created = created;
             this.owner = owner;

@@ -1,6 +1,5 @@
 package dev.ayam.folderinspector.core.model;
 
-import java.nio.file.attribute.AclEntry;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,14 +19,14 @@ import java.util.List;
  * @param acls         The list of ACL entries, if available.
  */
 public record Item(
-        String absolutePath,
-        String relativePath,
-        String type,
-        long size,
-        Instant lastModified,
-        Instant created,
-        String owner,
-        String group,
-        String permissions,
-        List<AclEntry> acls) {
+                String absolutePath,
+                String relativePath,
+                String type,
+                long size,
+                Instant lastModified,
+                Instant created,
+                String owner,
+                String group,
+                String permissions,
+                List<AclItem> acls) {
 }

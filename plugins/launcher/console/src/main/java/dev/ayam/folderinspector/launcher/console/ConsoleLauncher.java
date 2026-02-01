@@ -1,16 +1,17 @@
 package dev.ayam.folderinspector.launcher.console;
 
 import dev.ayam.folderinspector.core.model.Item;
-import dev.ayam.folderinspector.core.Launcher;
-import dev.ayam.folderinspector.core.Notifier;
-import dev.ayam.folderinspector.core.Scanner;
-import dev.ayam.folderinspector.core.Writer;
+import dev.ayam.folderinspector.core.plugin.Launcher;
+import dev.ayam.folderinspector.core.plugin.Notifier;
+import dev.ayam.folderinspector.core.plugin.Scanner;
+import dev.ayam.folderinspector.core.plugin.Writer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import dev.ayam.folderinspector.launcher.console.utility.StringResource;
 
 /**
  * Console implementation of the Launcher.
@@ -22,7 +23,7 @@ public class ConsoleLauncher implements Launcher {
 
     @Override
     public int launch(Scanner scanner, Writer writer, Notifier notifier, String path) {
-        logger.info("Launching Console workflow for path: {}", path);
+        logger.info(StringResource.LAUNCH_MESSAGE, path);
 
         Path rootPath = Paths.get(path);
         try {
@@ -31,7 +32,7 @@ public class ConsoleLauncher implements Launcher {
             notifier.notify(output);
             return 0;
         } catch (IOException e) {
-            String error = "Error during scanning: " + e.getMessage();
+            String error = StringResource.ERROR_SCANNING + e.getMessage();
             logger.error(error, e);
             notifier.notifyError(error);
             return 1;
@@ -40,6 +41,6 @@ public class ConsoleLauncher implements Launcher {
 
     @Override
     public String getName() {
-        return "console";
+        return StringResource.NAME;
     }
 }

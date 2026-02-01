@@ -1,4 +1,4 @@
-package dev.ayam.folderinspector.core;
+package dev.ayam.folderinspector.core.plugin;
 
 /**
  * Interface for launching the application logic.
