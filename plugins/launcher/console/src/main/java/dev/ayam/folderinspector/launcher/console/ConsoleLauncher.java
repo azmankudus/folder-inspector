@@ -1,6 +1,7 @@
 package dev.ayam.folderinspector.launcher.console;
 
 import dev.ayam.folderinspector.core.model.Item;
+import dev.ayam.folderinspector.core.plugin.Formatter;
 import dev.ayam.folderinspector.core.plugin.Launcher;
 import dev.ayam.folderinspector.core.plugin.Notifier;
 import dev.ayam.folderinspector.core.plugin.Scanner;
@@ -22,13 +23,14 @@ public class ConsoleLauncher implements Launcher {
     private static final Logger logger = LoggerFactory.getLogger(ConsoleLauncher.class);
 
     @Override
-    public int launch(Scanner scanner, Writer writer, Notifier notifier, String path) {
+    public int launch(Scanner scanner, Formatter formatter, Writer writer, Notifier notifier, String path) {
         logger.info(StringResource.LAUNCH_MESSAGE, path);
 
         Path rootPath = Paths.get(path);
-        try {
-            List<Item> items = scanner.scan(rootPath);
-            String output = writer.write(items);
+        try (java.util.stream.Stream<Item> items = scanner.scan(rootPath);
+                java.util.stream.Stream<String> formattedContent = formatter.format(items)) {
+
+            String output = writer.write(formattedContent);
             notifier.notify(output);
             return 0;
         } catch (IOException e) {

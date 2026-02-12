@@ -11,13 +11,14 @@ repositories {
 dependencies {
     implementation(platform(project(":bom")))
     api(rootProject.libs.picocli)
+    implementation(rootProject.libs.sqlite.jdbc)
     testImplementation(rootProject.libs.testng)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -35,9 +36,13 @@ tasks.named<Test>("test") {
 tasks.named<JavaExec>("run") {
     val pluginPaths = listOf(
         ":plugins:launcher:launcher-console",
+        ":plugins:launcher:launcher-rest",
+        ":plugins:launcher:launcher-web",
         ":plugins:scanner:scanner-local",
+        ":plugins:formatter:formatter-text",
+        ":plugins:formatter:formatter-csv",
         ":plugins:writer:writer-console",
-        ":plugins:writer:writer-csv",
+        ":plugins:writer:writer-file",
         ":plugins:notifier:notifier-console"
     )
 

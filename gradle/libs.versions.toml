@@ -2,11 +2,12 @@
 # https://docs.gradle.org/current/userguide/version_catalogs.html#sec::toml-dependencies-format
 
 [versions]
-jackson = "2.18.2"
-picocli = "4.7.6"
-testng = "7.5.1"
-slf4j = "2.0.12"
-logback = "1.5.3"
+jackson = "2.21.0"
+picocli = "4.7.7"
+testng = "7.12.0"
+slf4j = "2.0.17"
+logback = "1.5.27"
+sqlite = "3.49.1.0"
 
 [libraries]
 jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv", version.ref = "jackson" }
@@ -14,7 +15,18 @@ picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 testng = { module = "org.testng:testng", version.ref = "testng" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+
+micronaut-bom = { module = "io.micronaut:micronaut-bom", version = "4.10.7" }
+micronaut-http-server-netty = { module = "io.micronaut:micronaut-http-server-netty" }
+micronaut-jackson-databind = { module = "io.micronaut:micronaut-jackson-databind" }
+micronaut-session = { module = "io.micronaut.session:micronaut-session" }
+micronaut-security = { module = "io.micronaut.security:micronaut-security" }
+micronaut-security-jwt = { module = "io.micronaut.security:micronaut-security-jwt" }
+micronaut-security-annotations = { module = "io.micronaut.security:micronaut-security-annotations" }
+micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
+jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version = "3.1.1" }
 
 [plugins]
-foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version = "0.9.0" }
-sonarqube = { id = "org.sonarqube", version = "6.0.1.5171" }
+foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version = "1.0.0" }
+sonarqube = { id = "org.sonarqube", version = "7.2.2.6593" }

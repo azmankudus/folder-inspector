@@ -29,36 +29,29 @@ public class LocalScanner implements Scanner {
      * @throws IOException If an I/O error occurs during scanning.
      */
     @Override
-    public List<Item> scan(Path rootPath) throws IOException {
+    public java.util.stream.Stream<Item> scan(Path rootPath) throws IOException {
         logger.debug(StringResource.STARTING_SCAN, rootPath);
-        List<Item> items = new ArrayList<>();
 
-        Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                if (!dir.equals(rootPath)) {
-                    items.add(createItem(dir, rootPath, attrs));
-                }
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                items.add(createItem(file, rootPath, attrs));
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                logger.warn(StringResource.ERROR_ACCESS_FAILED, file, exc.getMessage());
-                // We should probably rely on a Notifier here, but for now system.err or logger
-                // is within scope of a local scanner logic handling issues
-                return FileVisitResult.CONTINUE;
-            }
-        });
-
-        logger.info(StringResource.SCAN_COMPLETED, items.size());
-        return items;
+        try {
+            return Files.walk(rootPath)
+                    .filter(path -> !path.equals(rootPath)) // Skip root itself if desired, matching original behavior
+                                                            // (preVisitDirectory check)
+                    .map(path -> {
+                        try {
+                            return createItem(path, rootPath,
+                                    Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS));
+                        } catch (IOException e) {
+                            logger.warn(StringResource.ERROR_ACCESS_FAILED, path, e.getMessage());
+                            return null;
+                        }
+                    })
+                    .filter(item -> item != null);
+        } catch (IOException e) {
+            // Files.walk might throw immediately. In a more advanced implementation we'd
+            // use a custom Spliterator.
+            // For now we rethrow or handle. Original contract throws IOException.
+            throw e;
+        }
     }
 
     private Item createItem(Path path, Path rootPath, BasicFileAttributes basicAttrs) throws IOException {

@@ -1,7 +1,6 @@
 package dev.ayam.folderinspector.core.plugin;
 
 import dev.ayam.folderinspector.core.model.Item;
-import java.util.List;
 
 /**
  * Interface for formatting a list of {@link Item}s into a string
@@ -9,12 +8,13 @@ import java.util.List;
  */
 public interface Writer {
     /**
-     * Formats a list of items.
+     * Writes the given content to the destination.
      *
-     * @param items The items to format.
-     * @return The formatted output string.
+     * @param content The content stream to write.
+     * @return The output string (e.g. for console or file path), or null/empty if
+     *         not applicable.
      */
-    String write(List<Item> items);
+    String write(java.util.stream.Stream<String> content);
 
     /**
      * @return The name of this writer implementation (e.g., "console", "csv").

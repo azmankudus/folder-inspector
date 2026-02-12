@@ -13,11 +13,12 @@ public interface Scanner {
      * Scans the given root path.
      *
      * @param rootPath The root directory to scan.
-     * @return A list of {@link Item} objects representing the files and directories
+     * @return A stream of {@link Item} objects representing the files and
+     *         directories
      *         found.
      * @throws IOException If an I/O error occurs during scanning.
      */
-    List<Item> scan(Path rootPath) throws IOException;
+    java.util.stream.Stream<Item> scan(Path rootPath) throws IOException;
 
     /**
      * @return The name of this scanner implementation (e.g., "local").

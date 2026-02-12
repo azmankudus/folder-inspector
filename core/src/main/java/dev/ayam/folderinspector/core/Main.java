@@ -1,5 +1,6 @@
 package dev.ayam.folderinspector.core;
 
+import dev.ayam.folderinspector.core.plugin.Formatter;
 import dev.ayam.folderinspector.core.plugin.Launcher;
 import dev.ayam.folderinspector.core.plugin.Notifier;
 import dev.ayam.folderinspector.core.plugin.Scanner;
@@ -37,6 +38,10 @@ public class Main implements Callable<Integer> {
       "--scanner" }, descriptionKey = "folder-inspector.scanner.description", defaultValue = "local")
   private String scannerName;
 
+  @Option(names = { "-f",
+      "--formatter" }, descriptionKey = "folder-inspector.formatter.description", defaultValue = "text")
+  private String formatterName;
+
   @Option(names = { "-w",
       "--writer" }, descriptionKey = "folder-inspector.writer.description", defaultValue = "console")
   private String writerName;
@@ -44,6 +49,21 @@ public class Main implements Callable<Integer> {
   @Option(names = { "-n",
       "--notifier" }, descriptionKey = "folder-inspector.notifier.description", defaultValue = "console")
   private String notifierName;
+
+  @Option(names = { "--save-snapshot" }, description = "Save scan results to a named snapshot")
+  private String saveSnapshotName;
+
+  @Option(names = { "--load-snapshot" }, description = "Load items from a named snapshot")
+  private String loadSnapshotName;
+
+  @Option(names = { "--list-snapshots" }, description = "List available snapshots")
+  private boolean listSnapshots;
+
+  @Option(names = { "--query", "-q" }, description = "SQL WHERE clause to filter snapshot results")
+  private String queryFilter;
+
+  @Option(names = { "--limit" }, description = "Limit number of results", defaultValue = "-1")
+  private int limit;
 
   public static void main(String[] args) {
     CommandLine commandLine = new CommandLine(new Main())
@@ -61,6 +81,7 @@ public class Main implements Callable<Integer> {
     sb.append(StringResource.AVAILABLE_PLUGINS_HEADER);
     sb.append(String.format(StringResource.LAUNCHERS_LABEL, listServiceNames(Launcher.class)));
     sb.append(String.format(StringResource.SCANNERS_LABEL, listServiceNames(Scanner.class)));
+    sb.append(String.format(StringResource.FORMATTERS_LABEL, listServiceNames(Formatter.class)));
     sb.append(String.format(StringResource.WRITERS_LABEL, listServiceNames(Writer.class)));
     sb.append(String.format(StringResource.NOTIFIERS_LABEL, listServiceNames(Notifier.class)));
     return sb.toString();
@@ -89,9 +110,26 @@ public class Main implements Callable<Integer> {
       return 1;
     }
 
+    // Handle --list-snapshots
+    if (listSnapshots) {
+      return handleListSnapshots(notifier);
+    }
+
+    // Handle --load-snapshot (loads from database)
+    if (loadSnapshotName != null) {
+      return handleLoadSnapshot(notifier);
+    }
+
+    // Normal scan flow
     Scanner scanner = loadService(Scanner.class, scannerName);
     if (scanner == null) {
       notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_SCANNER_NOT_FOUND + scannerName);
+      return 1;
+    }
+
+    Formatter formatter = loadService(Formatter.class, formatterName);
+    if (formatter == null) {
+      notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_FORMATTER_NOT_FOUND + formatterName);
       return 1;
     }
 
@@ -101,6 +139,11 @@ public class Main implements Callable<Integer> {
       return 1;
     }
 
+    // Handle --save-snapshot during normal scan
+    if (saveSnapshotName != null) {
+      return handleSaveSnapshot(scanner, formatter, writer, notifier);
+    }
+
     Launcher launcher = loadService(Launcher.class, launcherName);
     if (launcher == null) {
       notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_LAUNCHER_NOT_FOUND + launcherName);
@@ -108,9 +151,86 @@ public class Main implements Callable<Integer> {
     }
 
     logger.debug(StringResource.PLUGINS_LOADED,
-        launcherName, scannerName, writerName, notifierName);
+        launcherName, scannerName, formatterName, writerName, notifierName);
 
-    return launcher.launch(scanner, writer, notifier, folderPath);
+    return launcher.launch(scanner, formatter, writer, notifier, folderPath);
+  }
+
+  private Integer handleListSnapshots(Notifier notifier) {
+    try {
+      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
+      var snapshots = snapshotService.list();
+      if (snapshots.isEmpty()) {
+        notifier.notify("No snapshots found.");
+      } else {
+        System.out.println("Available snapshots:");
+        System.out.printf("%-20s %15s %15s %s%n", "NAME", "ITEMS", "SIZE", "CREATED");
+        System.out.println("-".repeat(70));
+        for (var snap : snapshots) {
+          System.out.printf("%-20s %,15d %,12d KB %s%n",
+              snap.name(), snap.itemCount(), snap.fileSize() / 1024, snap.created());
+        }
+      }
+      return 0;
+    } catch (Exception e) {
+      notifier.notifyError("Failed to list snapshots: " + e.getMessage());
+      return 1;
+    }
+  }
+
+  private Integer handleLoadSnapshot(Notifier notifier) {
+    try {
+      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
+
+      Formatter formatter = loadService(Formatter.class, formatterName);
+      if (formatter == null) {
+        notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_FORMATTER_NOT_FOUND + formatterName);
+        return 1;
+      }
+
+      Writer writer = loadService(Writer.class, writerName);
+      if (writer == null) {
+        notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_WRITER_NOT_FOUND + writerName);
+        return 1;
+      }
+
+      String whereClause = queryFilter;
+      if (limit > 0 && whereClause != null) {
+        // Limit is applied in SQL
+      }
+
+      try (var items = snapshotService.load(loadSnapshotName, whereClause)) {
+        var itemStream = limit > 0 ? items.limit(limit) : items;
+        try (var formatted = formatter.format(itemStream)) {
+          writer.write(formatted);
+        }
+      }
+      notifier.notify("Loaded from snapshot: " + loadSnapshotName);
+      return 0;
+    } catch (Exception e) {
+      notifier.notifyError("Failed to load snapshot: " + e.getMessage());
+      logger.error("Snapshot load error", e);
+      return 1;
+    }
+  }
+
+  private Integer handleSaveSnapshot(Scanner scanner, Formatter formatter, Writer writer, Notifier notifier) {
+    try {
+      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
+      var rootPath = java.nio.file.Paths.get(folderPath);
+
+      // Scan and save to snapshot
+      try (var items = scanner.scan(rootPath)) {
+        snapshotService.save(items, saveSnapshotName);
+      }
+
+      notifier.notify("Saved snapshot: " + saveSnapshotName);
+      return 0;
+    } catch (Exception e) {
+      notifier.notifyError("Failed to save snapshot: " + e.getMessage());
+      logger.error("Snapshot save error", e);
+      return 1;
+    }
   }
 
   private <T> T loadService(Class<T> serviceClass, String name) {

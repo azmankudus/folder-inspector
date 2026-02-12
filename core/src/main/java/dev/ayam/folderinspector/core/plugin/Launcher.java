@@ -13,7 +13,7 @@ public interface Launcher {
      * @param path     The path to scan.
      * @return Exit code.
      */
-    int launch(Scanner scanner, Writer writer, Notifier notifier, String path);
+    int launch(Scanner scanner, Formatter formatter, Writer writer, Notifier notifier, String path);
 
     /**
      * @return The name of this launcher implementation (e.g., "cli").
