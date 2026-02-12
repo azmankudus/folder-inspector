@@ -35,15 +35,15 @@ tasks.named<Test>("test") {
 // Add plugins to the classpath of the run task
 tasks.named<JavaExec>("run") {
     val pluginPaths = listOf(
-        ":plugins:launcher:launcher-console",
-        ":plugins:launcher:launcher-rest",
-        ":plugins:launcher:launcher-web",
-        ":plugins:scanner:scanner-local",
-        ":plugins:formatter:formatter-text",
-        ":plugins:formatter:formatter-csv",
-        ":plugins:writer:writer-console",
-        ":plugins:writer:writer-file",
-        ":plugins:notifier:notifier-console"
+        ":launcher-console",
+        ":launcher-rest",
+        ":launcher-web",
+        ":scanner-local",
+        ":formatter-text",
+        ":formatter-csv",
+        ":writer-console",
+        ":writer-file",
+        ":notifier-console"
     )
 
     val pluginProjects = pluginPaths.map { project(it) }

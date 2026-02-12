@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+@source "../src";
+
+:root {
+  color-scheme: light dark;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}

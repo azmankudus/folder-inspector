@@ -1,6 +1,0 @@
-@import "tailwindcss";
-@source "../src";
-
-body {
-  font-family: 'Inter', sans-serif;
-}
