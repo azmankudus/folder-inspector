@@ -1,8 +1,54 @@
-# Ignore Gradle project-specific cache directory
-.gradle
+# Ignore everything by default
+*
 
-# Ignore Gradle build output directory
-build
+# Include root config and metadata files
+!/.gitignore
+!/build.gradle.kts
+!/settings.gradle.kts
+!/gradle.properties
+!/REQUIREMENTS.md
+!/README.md
+!/LICENSE
+!/CONTRIBUTORS.md
+!/CODE_OF_CONDUCT.md
+!/SECURITY.md
 
-# Ignore Kotlin plugin data
-.kotlin
+# Include gradle directory (for version catalogs, etc.)
+!/gradle/
+!/gradle/**
+
+# Include specific module folders
+!/bom/
+!/bom/**
+!/core/
+!/core/**
+!/formatter-csv/
+!/formatter-csv/**
+!/formatter-text/
+!/formatter-text/**
+!/launcher-console/
+!/launcher-console/**
+!/launcher-rest/
+!/launcher-rest/**
+!/launcher-web/
+!/launcher-web/**
+!/notifier-console/
+!/notifier-console/**
+!/scanner-dummy/
+!/scanner-dummy/**
+!/scanner-local/
+!/scanner-local/**
+!/writer-console/
+!/writer-console/**
+!/writer-file/
+!/writer-file/**
+
+# Exclude build artifacts and caches within modules
+**/build/
+**/.gradle/
+**/.kotlin/
+**/.DS_Store/
+**/node_modules/
+**/.output/
+**/.vinxi/
+**/.nitro/
