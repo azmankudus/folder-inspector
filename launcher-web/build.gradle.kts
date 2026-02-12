@@ -15,6 +15,9 @@ dependencies {
     implementation(libs.micronaut.jackson.databind)
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation(libs.micronaut.session)
+    implementation(libs.micronaut.validation)
+    implementation(libs.jakarta.validation)
+    annotationProcessor(libs.micronaut.validation)
     
     runtimeOnly(libs.logback.classic)
     runtimeOnly("org.yaml:snakeyaml")

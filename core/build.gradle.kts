@@ -11,7 +11,7 @@ repositories {
 dependencies {
     implementation(platform(project(":bom")))
     api(rootProject.libs.picocli)
-    implementation(rootProject.libs.sqlite.jdbc)
+    implementation(rootProject.libs.slf4j.api)
     testImplementation(rootProject.libs.testng)
 }
 
@@ -39,11 +39,14 @@ tasks.named<JavaExec>("run") {
         ":launcher-rest",
         ":launcher-web",
         ":scanner-local",
+        ":scanner-dummy",
         ":formatter-text",
         ":formatter-csv",
         ":writer-console",
         ":writer-file",
-        ":notifier-console"
+        ":notifier-console",
+        ":database-jpa",
+        ":scheduler-quartz"
     )
 
     val pluginProjects = pluginPaths.map { project(it) }

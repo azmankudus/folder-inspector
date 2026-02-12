@@ -9,17 +9,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link Formatter} that produces a formatted ASCII table.
  */
 public class TextFormatter implements Formatter {
 
-  private static final Logger logger = LoggerFactory.getLogger(TextFormatter.class);
   private static final List<String> HEADERS = StringResource.TABLE_HEADERS;
 
+  /**
+   * Formats a stream of items into a stream of lines representing an ASCII table.
+   *
+   * @param items The stream of items to format.
+   * @return A stream of formatted table lines.
+   */
   @Override
   public java.util.stream.Stream<String> format(java.util.stream.Stream<Item> items) {
     if (items == null) {
@@ -30,36 +33,28 @@ public class TextFormatter implements Formatter {
       return java.util.stream.Stream.of(StringResource.NO_ITEMS_FOUND);
     }
 
-    // We can't easily stream the table creation locally line-by-line without
-    // buffering
-    // because column widths depend on all rows.
-    // So we buffer, calculate widths, and *then* stream the output strings.
-
-    // Logic extraction from formatTable to avoid duplicate buffering if possible,
-    // but formatTable uses list.
-    // We will keep formatTable logic but make it return a List<String> lines or
-    // Stream<String>.
-
-    // Refactoring formatTable to return Stream<String> would be better.
     return formatTableStream(itemList);
   }
 
-  // Helper to bridge the logic
+  /**
+   * Helper to format a list of items into an ASCII table stream.
+   * Note: This buffers all items to calculate column widths.
+   */
   private java.util.stream.Stream<String> formatTableStream(List<Item> items) {
     List<List<String>> rows = new ArrayList<>();
     rows.add(HEADERS);
 
     for (Item item : items) {
       rows.add(Arrays.asList(
-          item.absolutePath(),
-          item.relativePath(),
-          item.type(),
+          item.name(),
+          item.parent(),
+          item.type() != null ? item.type().name : "",
           String.valueOf(item.size()),
           DateTimeUtil.format(item.lastModified()),
           DateTimeUtil.format(item.created()),
-          item.owner(),
-          item.group(),
-          item.permissions(),
+          item.owner() != null ? item.owner().name() : "",
+          item.group() != null ? item.group().name() : "",
+          formatPermissions(item.permissions()),
           formatAcls(item.acls())));
     }
 
@@ -85,6 +80,9 @@ public class TextFormatter implements Formatter {
     return outputLines.stream();
   }
 
+  /**
+   * Formats a single row of the table.
+   */
   private String formatRow(List<String> row, int[] colWidths) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < row.size(); i++) {
@@ -94,6 +92,9 @@ public class TextFormatter implements Formatter {
     return sb.toString();
   }
 
+  /**
+   * Generates a separator line for the table.
+   */
   private String formatSeparator(int[] colWidths) {
     StringBuilder sb = new StringBuilder();
     for (int width : colWidths) {
@@ -104,20 +105,38 @@ public class TextFormatter implements Formatter {
     return sb.toString();
   }
 
+  /**
+   * Returns the name of this formatter.
+   *
+   * @return "text"
+   */
   @Override
   public String getName() {
     return "text";
   }
 
-  // Old methods removed/refactored into formatTableStream
+  /**
+   * Formats a set of permissions into a string.
+   */
+  private String formatPermissions(java.util.Set<dev.ayam.folderinspector.core.model.PermissionType> permissions) {
+    if (permissions == null || permissions.isEmpty()) {
+      return "";
+    }
+    return permissions.stream()
+        .map(p -> p.name)
+        .collect(Collectors.joining(","));
+  }
 
+  /**
+   * Formats a list of ACL items into a string.
+   */
   private String formatAcls(List<AclItem> acls) {
     if (acls == null || acls.isEmpty())
       return "";
     return acls.stream()
         .map(acl -> String.format("%s:[%s]:[%s]", acl.name(),
-            String.join(",", acl.permissions()),
-            String.join(",", acl.flags())))
+            acl.permissions().stream().map(p -> p.name).collect(Collectors.joining(",")),
+            acl.inheritFlags().stream().map(f -> f.name).collect(Collectors.joining(","))))
         .collect(Collectors.joining("; "));
   }
 }

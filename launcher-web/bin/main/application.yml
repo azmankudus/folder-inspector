@@ -1,0 +1,20 @@
+micronaut:
+  application:
+    name: folder-inspector-web
+  server:
+    port: 8081
+  session:
+    http:
+      cookie: true
+      header: true
+  router:
+    static-resources:
+      default:
+        enabled: true
+        mapping: "/**"
+        paths: "classpath:public"
+
+# Configure this to proxy to a REST launcher instance
+# Example: folder-inspector.api-url: "http://localhost:8080"
+folder-inspector:
+  api-url: ""

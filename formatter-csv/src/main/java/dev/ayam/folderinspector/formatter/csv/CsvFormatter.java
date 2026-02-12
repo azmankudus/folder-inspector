@@ -9,8 +9,6 @@ import dev.ayam.folderinspector.core.model.AclItem;
 import dev.ayam.folderinspector.core.plugin.Formatter;
 import dev.ayam.folderinspector.core.utility.DateTimeUtil;
 import dev.ayam.folderinspector.formatter.csv.utility.StringResource;
-import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -25,6 +23,12 @@ public class CsvFormatter implements Formatter {
   private final CsvMapper mapper = new CsvMapper();
   private final CsvSchema schema = mapper.schemaFor(CsvItem.class).withoutHeader();
 
+  /**
+   * Formats a stream of items into a stream of CSV strings.
+   *
+   * @param items The stream of items to format.
+   * @return A stream of CSV strings, starting with a header line.
+   */
   @Override
   public java.util.stream.Stream<String> format(java.util.stream.Stream<Item> items) {
     String header = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
@@ -44,52 +48,77 @@ public class CsvFormatter implements Formatter {
         items.map(this::formatItem));
   }
 
+  /**
+   * Returns the name of this formatter.
+   *
+   * @return "csv"
+   */
   @Override
   public String getName() {
     return "csv";
   }
 
+  /**
+   * Helper to format a single item into a CSV string.
+   */
   private String formatItem(Item item) {
     try {
       CsvItem csvItem = new CsvItem(
-          item.absolutePath(),
-          item.relativePath(),
-          item.type(),
+          item.name(),
+          item.parent(),
+          item.type() != null ? item.type().name : null,
           item.size(),
           DateTimeUtil.format(item.lastModified()),
           DateTimeUtil.format(item.created()),
-          item.owner(),
-          item.group(),
-          item.permissions(),
+          item.owner() != null ? item.owner().name() : null,
+          item.group() != null ? item.group().name() : null,
+          formatPermissions(item.permissions()),
           formatAcls(item.acls()));
 
-      return mapper.writer(schema).writeValueAsString(csvItem).trim(); // trim to remove newline added by jackson if
-                                                                       // any, or ensuring single line
+      return mapper.writer(schema).writeValueAsString(csvItem).trim();
     } catch (Exception e) {
       logger.error("Error formatting item", e);
       return "";
     }
   }
 
+  /**
+   * Formats a set of permissions into a string.
+   */
+  private String formatPermissions(java.util.Set<dev.ayam.folderinspector.core.model.PermissionType> permissions) {
+    if (permissions == null || permissions.isEmpty()) {
+      return "";
+    }
+    return permissions.stream()
+        .map(p -> p.name)
+        .collect(Collectors.joining(","));
+  }
+
+  /**
+   * Formats a list of ACL items into a string.
+   */
   private String formatAcls(List<AclItem> acls) {
     if (acls == null || acls.isEmpty())
       return "";
     return acls.stream()
         .map(acl -> String.format("%s:[%s]:[%s]", acl.name(),
-            String.join(",", acl.permissions()),
-            String.join(",", acl.flags())))
+            acl.permissions().stream().map(p -> p.name).collect(Collectors.joining(",")),
+            acl.inheritFlags().stream().map(f -> f.name).collect(Collectors.joining(","))))
         .collect(Collectors.joining("; "));
   }
 
+  /**
+   * DTO for Jackson CSV mapping.
+   */
   @JsonPropertyOrder({
-      "absolutePath", "relativePath", "type", "size",
+      "name", "parent", "type", "size",
       "lastModified", "created", "owner", "group", "permissions", "acls"
   })
   private static class CsvItem {
     @JsonProperty
-    public String absolutePath;
+    public String name;
     @JsonProperty
-    public String relativePath;
+    public String parent;
     @JsonProperty
     public String type;
     @JsonProperty
@@ -107,10 +136,10 @@ public class CsvFormatter implements Formatter {
     @JsonProperty
     public String acls;
 
-    public CsvItem(String absolutePath, String relativePath, String type, long size, String lastModified,
+    public CsvItem(String name, String parent, String type, long size, String lastModified,
         String created, String owner, String group, String permissions, String acls) {
-      this.absolutePath = absolutePath;
-      this.relativePath = relativePath;
+      this.name = name;
+      this.parent = parent;
       this.type = type;
       this.size = String.valueOf(size);
       this.lastModified = lastModified;

@@ -6,6 +6,7 @@ rootProject.name = "folder-inspector"
 
 include("bom")
 include("core")
+include("scheduler-quartz")
 
 
 // Plugins
@@ -19,3 +20,4 @@ include("formatter-csv")
 include("writer-console")
 include("writer-file")
 include("notifier-console")
+include("database-jpa")

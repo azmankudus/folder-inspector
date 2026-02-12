@@ -1,25 +1,28 @@
 package dev.ayam.folderinspector.core.plugin;
 
 /**
- * Interface for notifying users.
+ * Interface for providing notifications to the user.
+ * Implementations can notify via console, desktop alerts, emails, etc.
  */
 public interface Notifier {
     /**
-     * Notify the user with a message.
+     * Notifies the user with a general message.
      *
      * @param message The message to display.
      */
     void notify(String message);
 
     /**
-     * Notify the user with an error message.
-     * 
-     * @param message The error message.
+     * Notifies the user with an error message.
+     *
+     * @param message The error message to display.
      */
     void notifyError(String message);
 
     /**
-     * @return The name of this notifier implementation (e.g., "console").
+     * Returns the unique name of this notifier implementation.
+     *
+     * @return The notifier name (e.g., "console").
      */
     String getName();
 }

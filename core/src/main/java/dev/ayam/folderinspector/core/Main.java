@@ -1,5 +1,6 @@
 package dev.ayam.folderinspector.core;
 
+import dev.ayam.folderinspector.core.plugin.Database;
 import dev.ayam.folderinspector.core.plugin.Formatter;
 import dev.ayam.folderinspector.core.plugin.Launcher;
 import dev.ayam.folderinspector.core.plugin.Notifier;
@@ -50,6 +51,14 @@ public class Main implements Callable<Integer> {
       "--notifier" }, descriptionKey = "folder-inspector.notifier.description", defaultValue = "console")
   private String notifierName;
 
+  @Option(names = { "-d",
+      "--database" }, description = "Database plugin to use for snapshots", defaultValue = "jpa")
+  private String databaseName;
+
+  @Option(names = {
+      "--scheduler" }, description = "Scheduler plugin to use for background scans", defaultValue = "quartz")
+  private String schedulerName;
+
   @Option(names = { "--save-snapshot" }, description = "Save scan results to a named snapshot")
   private String saveSnapshotName;
 
@@ -59,12 +68,17 @@ public class Main implements Callable<Integer> {
   @Option(names = { "--list-snapshots" }, description = "List available snapshots")
   private boolean listSnapshots;
 
-  @Option(names = { "--query", "-q" }, description = "SQL WHERE clause to filter snapshot results")
+  @Option(names = { "--query", "-q" }, description = "Query to filter snapshot results")
   private String queryFilter;
 
   @Option(names = { "--limit" }, description = "Limit number of results", defaultValue = "-1")
   private int limit;
 
+  /**
+   * Main entry point. Initializes Picocli and executes the command.
+   *
+   * @param args Command line arguments.
+   */
   public static void main(String[] args) {
     CommandLine commandLine = new CommandLine(new Main())
         .setExecutionExceptionHandler(new ExceptionHandler());
@@ -76,6 +90,11 @@ public class Main implements Callable<Integer> {
     System.exit(exitCode);
   }
 
+  /**
+   * Generates a footer string for the usage message listing available plugins.
+   *
+   * @return The footer string.
+   */
   private static String getAvailablePlugins() {
     StringBuilder sb = new StringBuilder();
     sb.append(StringResource.AVAILABLE_PLUGINS_HEADER);
@@ -84,9 +103,18 @@ public class Main implements Callable<Integer> {
     sb.append(String.format(StringResource.FORMATTERS_LABEL, listServiceNames(Formatter.class)));
     sb.append(String.format(StringResource.WRITERS_LABEL, listServiceNames(Writer.class)));
     sb.append(String.format(StringResource.NOTIFIERS_LABEL, listServiceNames(Notifier.class)));
+    sb.append(String.format(" Databases: %s\n", listServiceNames(Database.class)));
+    sb.append(
+        String.format(" Schedulers: %s\n", listServiceNames(dev.ayam.folderinspector.core.plugin.Scheduler.class)));
     return sb.toString();
   }
 
+  /**
+   * Lists names of all registered implementations of a given service class.
+   *
+   * @param serviceClass The interface class to load services for.
+   * @return A comma-separated string of plugin names.
+   */
   private static <T> String listServiceNames(Class<T> serviceClass) {
     return StreamSupport.stream(ServiceLoader.load(serviceClass).spliterator(), false)
         .map(s -> {
@@ -100,24 +128,40 @@ public class Main implements Callable<Integer> {
         .orElse(StringResource.NONE_PLUGIN);
   }
 
+  /**
+   * Core execution logic. Loads required plugins and launches the scan.
+   *
+   * @return Process exit code.
+   */
   @Override
   public Integer call() {
     logger.debug(StringResource.BOOTSTRAPPING_APP);
 
     Notifier notifier = loadService(Notifier.class, notifierName);
     if (notifier == null) {
-      System.err.println(StringResource.ERROR_PREFIX + StringResource.ERR_NOTIFIER_NOT_FOUND + notifierName);
+      System.err.println(StringResource.ERROR_PREFIX + StringResource.ERR_NOTIFIER_NOT_FOUND
+          + (notifierName != null ? notifierName : "default"));
       return 1;
+    }
+
+    // Load database plugin if needed
+    Database database = null;
+    if (listSnapshots || loadSnapshotName != null || saveSnapshotName != null) {
+      database = loadService(Database.class, databaseName);
+      if (database == null) {
+        notifier.notifyError("Database plugin not found: " + databaseName);
+        return 1;
+      }
     }
 
     // Handle --list-snapshots
     if (listSnapshots) {
-      return handleListSnapshots(notifier);
+      return handleListSnapshots(database, notifier);
     }
 
     // Handle --load-snapshot (loads from database)
     if (loadSnapshotName != null) {
-      return handleLoadSnapshot(notifier);
+      return handleLoadSnapshot(database, notifier);
     }
 
     // Normal scan flow
@@ -141,7 +185,7 @@ public class Main implements Callable<Integer> {
 
     // Handle --save-snapshot during normal scan
     if (saveSnapshotName != null) {
-      return handleSaveSnapshot(scanner, formatter, writer, notifier);
+      return handleSaveSnapshot(database, scanner, formatter, writer, notifier);
     }
 
     Launcher launcher = loadService(Launcher.class, launcherName);
@@ -150,20 +194,29 @@ public class Main implements Callable<Integer> {
       return 1;
     }
 
+    dev.ayam.folderinspector.core.plugin.Scheduler scheduler = loadService(
+        dev.ayam.folderinspector.core.plugin.Scheduler.class, schedulerName);
+    if (scheduler == null) {
+      notifier.notifyError("Scheduler plugin not found: " + schedulerName);
+      return 1;
+    }
+
     logger.debug(StringResource.PLUGINS_LOADED,
         launcherName, scannerName, formatterName, writerName, notifierName);
 
-    return launcher.launch(scanner, formatter, writer, notifier, folderPath);
+    return launcher.launch(database, scanner, formatter, writer, notifier, scheduler, folderPath);
   }
 
-  private Integer handleListSnapshots(Notifier notifier) {
+  /**
+   * Lists available snapshots to the user via the notifier.
+   */
+  private Integer handleListSnapshots(Database database, Notifier notifier) {
     try {
-      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
-      var snapshots = snapshotService.list();
+      var snapshots = database.list();
       if (snapshots.isEmpty()) {
-        notifier.notify("No snapshots found.");
+        notifier.notify("No snapshots found in database: " + database.getName());
       } else {
-        System.out.println("Available snapshots:");
+        System.out.println("Available snapshots (" + database.getName() + "):");
         System.out.printf("%-20s %15s %15s %s%n", "NAME", "ITEMS", "SIZE", "CREATED");
         System.out.println("-".repeat(70));
         for (var snap : snapshots) {
@@ -178,10 +231,11 @@ public class Main implements Callable<Integer> {
     }
   }
 
-  private Integer handleLoadSnapshot(Notifier notifier) {
+  /**
+   * Loads and displays contents of a snapshot.
+   */
+  private Integer handleLoadSnapshot(Database database, Notifier notifier) {
     try {
-      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
-
       Formatter formatter = loadService(Formatter.class, formatterName);
       if (formatter == null) {
         notifier.notifyError(StringResource.ERROR_PREFIX + StringResource.ERR_FORMATTER_NOT_FOUND + formatterName);
@@ -194,12 +248,7 @@ public class Main implements Callable<Integer> {
         return 1;
       }
 
-      String whereClause = queryFilter;
-      if (limit > 0 && whereClause != null) {
-        // Limit is applied in SQL
-      }
-
-      try (var items = snapshotService.load(loadSnapshotName, whereClause)) {
+      try (var items = database.load(loadSnapshotName, queryFilter)) {
         var itemStream = limit > 0 ? items.limit(limit) : items;
         try (var formatted = formatter.format(itemStream)) {
           writer.write(formatted);
@@ -214,14 +263,17 @@ public class Main implements Callable<Integer> {
     }
   }
 
-  private Integer handleSaveSnapshot(Scanner scanner, Formatter formatter, Writer writer, Notifier notifier) {
+  /**
+   * Executes a scan and saves the results to a snapshot.
+   */
+  private Integer handleSaveSnapshot(Database database, Scanner scanner, Formatter formatter, Writer writer,
+      Notifier notifier) {
     try {
-      var snapshotService = new dev.ayam.folderinspector.core.snapshot.SnapshotService();
       var rootPath = java.nio.file.Paths.get(folderPath);
 
       // Scan and save to snapshot
       try (var items = scanner.scan(rootPath)) {
-        snapshotService.save(items, saveSnapshotName);
+        database.save(items, saveSnapshotName);
       }
 
       notifier.notify("Saved snapshot: " + saveSnapshotName);
@@ -233,6 +285,9 @@ public class Main implements Callable<Integer> {
     }
   }
 
+  /**
+   * Helper to load a specific service implementation by name.
+   */
   private <T> T loadService(Class<T> serviceClass, String name) {
     return StreamSupport.stream(ServiceLoader.load(serviceClass).spliterator(), false)
         .filter(s -> {
@@ -248,6 +303,9 @@ public class Main implements Callable<Integer> {
         .orElse(null);
   }
 
+  /**
+   * Execution exception handler for picocli.
+   */
   static class ExceptionHandler implements IExecutionExceptionHandler {
     @Override
     public int handleExecutionException(Exception ex, CommandLine commandLine, ParseResult parseResult) {

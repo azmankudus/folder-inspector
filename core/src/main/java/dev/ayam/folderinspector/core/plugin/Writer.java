@@ -1,23 +1,23 @@
 package dev.ayam.folderinspector.core.plugin;
 
-import dev.ayam.folderinspector.core.model.Item;
-
 /**
- * Interface for formatting a list of {@link Item}s into a string
- * representation.
+ * Interface for writing formatted item content to a destination.
+ * Implementations can write to the console, a file, a database, etc.
  */
 public interface Writer {
     /**
-     * Writes the given content to the destination.
+     * Writes the specified content stream to the configured destination.
      *
-     * @param content The content stream to write.
-     * @return The output string (e.g. for console or file path), or null/empty if
-     *         not applicable.
+     * @param content A stream of formatted strings to write.
+     * @return A status message or identifier related to the write operation (e.g.,
+     *         file path).
      */
     String write(java.util.stream.Stream<String> content);
 
     /**
-     * @return The name of this writer implementation (e.g., "console", "csv").
+     * Returns the unique name of this writer implementation.
+     *
+     * @return The writer name (e.g., "console", "file").
      */
     String getName();
 }

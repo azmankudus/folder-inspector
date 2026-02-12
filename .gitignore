@@ -20,6 +20,8 @@
 # Include specific module folders
 !/bom/
 !/bom/**
+!/docs/
+!/docs/**
 !/core/
 !/core/**
 !/formatter-csv/
@@ -42,6 +44,10 @@
 !/writer-console/**
 !/writer-file/
 !/writer-file/**
+!/database-jpa/
+!/database-jpa/**
+!/scheduler-quartz/
+!/scheduler-quartz/**
 
 # Exclude build artifacts and caches within modules
 **/build/
@@ -52,3 +58,7 @@
 **/.output/
 **/.vinxi/
 **/.nitro/
+**/*.class
+**/*.jar
+**/*.lock
+**/*.log

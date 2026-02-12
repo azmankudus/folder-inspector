@@ -8,6 +8,9 @@ testng = "7.12.0"
 slf4j = "2.0.17"
 logback = "1.5.27"
 sqlite = "3.49.1.0"
+hibernate = "6.6.9.Final"
+jakarta-persistence = "3.1.0"
+quartz = "2.5.0-rc1"
 
 [libraries]
 jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv", version.ref = "jackson" }
@@ -16,6 +19,10 @@ testng = { module = "org.testng:testng", version.ref = "testng" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "hibernate" }
+hibernate-community-dialects = { module = "org.hibernate.orm:hibernate-community-dialects", version.ref = "hibernate" }
+jakarta-persistence = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence" }
+quartz = { module = "org.quartz-scheduler:quartz", version.ref = "quartz" }
 
 micronaut-bom = { module = "io.micronaut:micronaut-bom", version = "4.10.7" }
 micronaut-http-server-netty = { module = "io.micronaut:micronaut-http-server-netty" }

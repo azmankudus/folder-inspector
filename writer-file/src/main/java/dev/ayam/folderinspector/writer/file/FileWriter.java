@@ -9,15 +9,24 @@ import java.nio.file.StandardOpenOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implementation of {@link Writer} that saves data to a local file.
+ */
 public class FileWriter implements Writer {
 
   private static final Logger logger = LoggerFactory.getLogger(FileWriter.class);
   private static final String DEFAULT_FILE_NAME = "report.txt";
 
+  /**
+   * Writes the provided content stream to a default file named "report.txt".
+   *
+   * @param content The stream of formatted strings to write.
+   * @return A status message indicating success or failure.
+   */
   @Override
   public String write(java.util.stream.Stream<String> content) {
     if (content == null) {
-      return "No content to write"; // Or use utility resource
+      return "No content to write";
     }
 
     try {
@@ -41,6 +50,11 @@ public class FileWriter implements Writer {
     }
   }
 
+  /**
+   * Returns the name of this writer.
+   *
+   * @return "file"
+   */
   @Override
   public String getName() {
     return StringResource.NAME;

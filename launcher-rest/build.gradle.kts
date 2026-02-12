@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.jakarta.validation)
     
     annotationProcessor(libs.micronaut.security.annotations)
+    annotationProcessor(libs.micronaut.validation)
     
     implementation("jakarta.annotation:jakarta.annotation-api")
     

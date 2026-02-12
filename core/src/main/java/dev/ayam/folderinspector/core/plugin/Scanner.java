@@ -3,25 +3,24 @@ package dev.ayam.folderinspector.core.plugin;
 import dev.ayam.folderinspector.core.model.Item;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
- * Interface for scanning a directory.
+ * Interface for scanning a file system or simulated environment.
  */
 public interface Scanner {
     /**
-     * Scans the given root path.
+     * Scans the specified root path and returns a stream of found items.
      *
-     * @param rootPath The root directory to scan.
-     * @return A stream of {@link Item} objects representing the files and
-     *         directories
-     *         found.
-     * @throws IOException If an I/O error occurs during scanning.
+     * @param rootPath The root directory path to scan.
+     * @return A stream of {@link Item} objects.
+     * @throws IOException If an I/O error occurs during the scan.
      */
     java.util.stream.Stream<Item> scan(Path rootPath) throws IOException;
 
     /**
-     * @return The name of this scanner implementation (e.g., "local").
+     * Returns the unique name of this scanner implementation.
+     *
+     * @return The scanner name (e.g., "local", "dummy").
      */
     String getName();
 }
