@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
-@source "../src";
+@source "./**/*.{ts,tsx}";
 
 :root {
   color-scheme: light dark;

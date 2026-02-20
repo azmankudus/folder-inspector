@@ -1,7 +1,6 @@
 import { ParentComponent, Show, JSX } from 'solid-js';
-import { isDark } from '../store';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;

@@ -1,7 +1,6 @@
 import { Component, For, Show } from 'solid-js';
 import { FileEntry } from '../types';
-import { isDark } from '../store';
-import Modal from './Modal';
+import { Modal } from '@folder-inspector/ui';
 
 interface FileDetailsModalProps {
   file: FileEntry;

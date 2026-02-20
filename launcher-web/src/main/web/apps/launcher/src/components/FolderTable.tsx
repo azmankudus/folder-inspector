@@ -2,8 +2,7 @@ import { createSignal, createMemo, createEffect, Show, For } from 'solid-js';
 import { TargetConfig, FileEntry } from '../types';
 import { formatBytes } from '../constants';
 import { wildcardMatch } from '../utils';
-import { isDark } from '../store';
-import { DataTable, Column } from './DataTable';
+import { DataTable, Column } from '@folder-inspector/ui';
 
 interface FolderTableProps {
   config: TargetConfig;
@@ -13,7 +12,7 @@ interface FolderTableProps {
 }
 
 const FolderTable = (props: FolderTableProps) => {
-  const textClass = () => isDark() ? 'text-slate-200' : 'text-slate-800';
+  /* textClass removed, using classes */
 
   const columns: Column<FileEntry>[] = [
     {
@@ -78,7 +77,7 @@ const FolderTable = (props: FolderTableProps) => {
               <svg class="w-5 h-5 p-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             </button>
             <div>
-              <h3 class={`font-bold ${textClass()}`}>{props.config.name}</h3>
+              <h3 class="font-bold text-slate-800 dark:text-slate-200">{props.config.name}</h3>
               <p class="text-xs text-slate-500 font-mono">{props.config.rootPath}</p>
             </div>
           </div>
