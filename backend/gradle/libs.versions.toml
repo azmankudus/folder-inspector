@@ -26,7 +26,6 @@ micronaut-security = { module = "io.micronaut.security:micronaut-security" }
 micronaut-security-jwt = { module = "io.micronaut.security:micronaut-security-jwt" }
 micronaut-security-oauth2 = { module = "io.micronaut.security:micronaut-security-oauth2" }
 micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
-micronaut-expressions = { module = "io.micronaut:micronaut-expressions" }
 
 logback-classic = { module = "ch.qos.logback:logback-classic" }
 postgresql = { module = "org.postgresql:postgresql" }

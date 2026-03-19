@@ -14,118 +14,121 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import jakarta.transaction.Transactional;
+import io.micronaut.serde.annotation.Serdeable;
 
 @Controller("/sql")
-@Secured({"SQL_ADMIN"})
 public class SqlController {
-    private static final Logger LOG = LoggerFactory.getLogger(SqlController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SqlController.class);
 
-    private final DataSource dataSource;
+  private final DataSource dataSource;
 
-    public SqlController(DataSource dataSource) {
-        this.dataSource = dataSource;
+  public SqlController(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
+
+  @Get("/tables")
+  @Secured({ "API_SQL_LIST_TABLES" })
+  @Transactional
+  public List<String> getTables() {
+    LOG.trace("Fetching database tables list");
+    List<String> tables = new ArrayList<>();
+    try (Connection conn = dataSource.getConnection();
+        ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE" })) {
+      while (rs.next()) {
+        tables.add(rs.getString("TABLE_NAME"));
+      }
+    } catch (Exception e) {
+      LOG.error("Failed to fetch database tables", e);
+      throw new RuntimeException("Error fetching tables: " + e.getMessage(), e);
+    }
+    return tables;
+  }
+
+  @Post("/execute")
+  @Secured({ "API_SQL_EXECUTE" })
+  @Transactional
+  public QueryResult executeQuery(@Body QueryRequest request) {
+    LOG.info("Executing administrative SQL query");
+    QueryResult result = new QueryResult();
+    result.setColumns(new ArrayList<>());
+    result.setRows(new ArrayList<>());
+
+    if (request.query() == null || request.query().trim().isEmpty()) {
+      LOG.warn("Received empty SQL query request");
+      result.setError("Query cannot be empty.");
+      return result;
     }
 
-    @Get("/tables")
-    @jakarta.transaction.Transactional
-    public List<String> getTables() {
-        LOG.trace("Fetching database tables list");
-        List<String> tables = new ArrayList<>();
-        try (Connection conn = dataSource.getConnection();
-                ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE" })) {
-            while (rs.next()) {
-                tables.add(rs.getString("TABLE_NAME"));
+    try (Connection conn = dataSource.getConnection();
+        Statement stmt = conn.createStatement()) {
+
+      LOG.debug("Executing SQL statement: {}", request.query());
+      boolean isResultSet = stmt.execute(request.query());
+
+      if (isResultSet) {
+        try (ResultSet rs = stmt.getResultSet()) {
+          ResultSetMetaData metaData = rs.getMetaData();
+          int columnCount = metaData.getColumnCount();
+
+          for (int i = 1; i <= columnCount; i++) {
+            result.getColumns().add(metaData.getColumnName(i));
+          }
+
+          while (rs.next()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            for (int i = 1; i <= columnCount; i++) {
+              row.put(metaData.getColumnName(i), rs.getObject(i));
             }
-        } catch (Exception e) {
-            LOG.error("Failed to fetch database tables", e);
-            throw new RuntimeException("Error fetching tables: " + e.getMessage(), e);
+            result.getRows().add(row);
+          }
         }
-        return tables;
+      } else {
+        int updateCount = stmt.getUpdateCount();
+        LOG.debug("SQL update completed, rows affected: {}", updateCount);
+        result.setError("Query executed successfully. Rows affected: " + updateCount);
+      }
+
+    } catch (Exception e) {
+      LOG.error("Exception during SQL execution", e);
+      result.setError(e.getMessage());
     }
 
-    @Post("/execute")
-    @jakarta.transaction.Transactional
-    public QueryResult executeQuery(@Body QueryRequest request) {
-        LOG.info("Executing administrative SQL query");
-        QueryResult result = new QueryResult();
-        result.setColumns(new ArrayList<>());
-        result.setRows(new ArrayList<>());
+    return result;
+  }
 
-        if (request.query() == null || request.query().trim().isEmpty()) {
-            LOG.warn("Received empty SQL query request");
-            result.setError("Query cannot be empty.");
-            return result;
-        }
+  @Serdeable.Deserializable
+  public record QueryRequest(String query) {
+  }
 
-        try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement()) {
+  @Serdeable
+  public static class QueryResult {
+    private List<String> columns;
+    private List<Map<String, Object>> rows;
+    private String error;
 
-            LOG.debug("Executing SQL statement: {}", request.query());
-            boolean isResultSet = stmt.execute(request.query());
-
-            if (isResultSet) {
-                try (ResultSet rs = stmt.getResultSet()) {
-                    ResultSetMetaData metaData = rs.getMetaData();
-                    int columnCount = metaData.getColumnCount();
-
-                    for (int i = 1; i <= columnCount; i++) {
-                        result.getColumns().add(metaData.getColumnName(i));
-                    }
-
-                    while (rs.next()) {
-                        Map<String, Object> row = new LinkedHashMap<>();
-                        for (int i = 1; i <= columnCount; i++) {
-                            row.put(metaData.getColumnName(i), rs.getObject(i));
-                        }
-                        result.getRows().add(row);
-                    }
-                }
-            } else {
-                int updateCount = stmt.getUpdateCount();
-                LOG.debug("SQL update completed, rows affected: {}", updateCount);
-                result.setError("Query executed successfully. Rows affected: " + updateCount);
-            }
-
-        } catch (Exception e) {
-            LOG.error("Exception during SQL execution", e);
-            result.setError(e.getMessage());
-        }
-
-        return result;
+    public List<String> getColumns() {
+      return columns;
     }
 
-    @io.micronaut.serde.annotation.Serdeable.Deserializable
-    public record QueryRequest(String query) {
+    public void setColumns(List<String> columns) {
+      this.columns = columns;
     }
 
-    @io.micronaut.serde.annotation.Serdeable
-    public static class QueryResult {
-        private List<String> columns;
-        private List<Map<String, Object>> rows;
-        private String error;
-
-        public List<String> getColumns() {
-            return columns;
-        }
-
-        public void setColumns(List<String> columns) {
-            this.columns = columns;
-        }
-
-        public List<Map<String, Object>> getRows() {
-            return rows;
-        }
-
-        public void setRows(List<Map<String, Object>> rows) {
-            this.rows = rows;
-        }
-
-        public String getError() {
-            return error;
-        }
-
-        public void setError(String error) {
-            this.error = error;
-        }
+    public List<Map<String, Object>> getRows() {
+      return rows;
     }
+
+    public void setRows(List<Map<String, Object>> rows) {
+      this.rows = rows;
+    }
+
+    public String getError() {
+      return error;
+    }
+
+    public void setError(String error) {
+      this.error = error;
+    }
+  }
 }

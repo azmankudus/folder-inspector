@@ -3,8 +3,8 @@ import { MetaProvider, Title } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { ErrorBoundary, Suspense, onMount, Show } from "solid-js";
-import { store } from "./lib/store";
-import { getUserInfo } from "./lib/api";
+import { store } from "~/lib/store";
+import { getUserInfo } from "~/lib/api";
 
 export default function App() {
   onMount(() => {
@@ -48,7 +48,6 @@ export default function App() {
                  </div>
               </Show>
 
-              <div class="fixed bottom-0 right-0 p-1 text-[8px] text-zinc-800 pointer-events-none select-none">v0.1.0-insp</div>
             </Suspense>
           </ErrorBoundary>
         </MetaProvider>

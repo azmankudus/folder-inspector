@@ -1,10 +1,10 @@
 package backend.service;
 
 import backend.model.ScanMode;
-import backend.model.ScanProfile;
-import backend.model.ScanHistory;
-import backend.repository.ScanHistoryRepository;
-import backend.repository.ScanProfileRepository;
+import backend.model.ScanConfig;
+import backend.model.Job;
+import backend.repository.JobRepository;
+import backend.repository.ScanConfigRepository;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
@@ -17,21 +17,21 @@ class ScanServiceTest {
     ScanService scanService;
 
     @Inject
-    ScanHistoryRepository scanHistoryRepo;
+    JobRepository scanHistoryRepo;
 
     @Inject
-    ScanProfileRepository scanProfileRepo;
+    ScanConfigRepository scanProfileRepo;
 
     @Test
     void testStartScanHistoryCreation() {
-        ScanProfile profile = new ScanProfile(null, 1L, "C:\\Test", "0 0 0 * * ?", ScanMode.FULL);
+        ScanConfig profile = new ScanConfig(null, 1L, "C:\\Test", "0 0 0 * * ?", ScanMode.FULL);
         profile = scanProfileRepo.save(profile);
-        
-        ScanHistory history = scanService.startScan(profile);
-        
+
+        Job history = scanService.startScan(profile);
+
         Assertions.assertNotNull(history.id());
         Assertions.assertEquals("IN_PROGRESS", history.status());
-        
+
         // Clean up
         scanHistoryRepo.delete(history);
         scanProfileRepo.delete(profile);

@@ -2,7 +2,11 @@ const API_URL = "http://localhost:8080/api";
 
 export function getToken() {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("token");
+    const local = localStorage.getItem("token");
+    if (local) return local;
+
+    const match = document.cookie.match(/(^|;)\s*token\s*=\s*([^;]+)/);
+    return match ? match[2] : null;
   }
   return null;
 }
@@ -17,12 +21,21 @@ export function getUserInfo() {
   const token = getToken();
   if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    const payload = JSON.parse(jsonPayload);
     return {
       username: payload.sub,
       roles: payload.roles || []
     };
   } catch (e) {
+    console.error("JWT Parse Error:", e);
     return null;
   }
 }
@@ -30,6 +43,7 @@ export function getUserInfo() {
 export function removeToken() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("token");
+    document.cookie = "token=; Max-Age=0; path=/; SameSite=Lax";
   }
 }
 
@@ -49,8 +63,8 @@ async function request(endpoint: string, options: RequestInit = {}) {
   if (!res.ok) {
     if (res.status === 401) {
       removeToken();
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (typeof window !== "undefined" && window.location.pathname !== "/access/login") {
+        window.location.href = "/access/login";
       }
     }
     const err = await res.text().catch(() => res.statusText);
@@ -58,7 +72,7 @@ async function request(endpoint: string, options: RequestInit = {}) {
     console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, errorMessage);
     throw new Error(errorMessage);
   }
-  
+
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }

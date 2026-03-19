@@ -34,7 +34,6 @@ dependencies {
     implementation(libs.poi.ooxml)
     implementation(libs.opencsv)
     implementation(libs.micronaut.liquibase)
-    implementation(libs.micronaut.expressions)
     
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.postgresql)

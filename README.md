@@ -13,10 +13,11 @@
 
 - **Scalable Discovery**: Iterative, non-recursive directory traversal that handles millions of files and deep nesting.
 - **Resilient Identity Resolution**: Resolves SIDs to human-readable names via LDAP (Active Directory) with built-in failover support.
+- **Discovery Report Engine**: New standalone module for generating historical scan reports with automated summaries and full data detail views.
 - **Streaming Export Engine**: Generate CSV and multi-million row Excel (XLSX) reports with constant memory usage.
 - **Dynamic Partitioning**: Uses PostgreSQL table partitioning (by Scan Profile) for high-performance data isolation and rapid cleanup.
 - **Premium UI**: Reactive dashboard built with SolidJS and Solid Store for a smooth, state-of-the-art user experience.
-- **Secure by Design**: JWT-based authentication, automatic secret generation, and role-based access control (RBAC).
+- **Secure by Design**: JWT-based authentication, role-based access control (RBAC), and granular API permissions (`API_REPORT_ALL`, `API_REPORT_RESTRICTED`).
 
 ---
 
@@ -26,9 +27,9 @@ The application is built on a modular Micronaut backend and a reactive Solid Sta
 
 ### Backend (Java 21)
 - **Service Layer Pattern**: Decoupled business logic for scanning, exporting, and schema management.
-- **Job Orchestration**: Background scan jobs are launched as isolated processes with real-time log tracking.
-- **Streaming Pipeline**: Leveraging `SXSSFWorkbook` and `CSVWriter` with `Writable` interfaces to pipe data directly from DB to HTTP response.
-- **Schema Management**: Liquibase-driven versioning with dynamic runtime partition creation.
+- **Job Orchestration**: Background scan jobs are managed via `JobController` and `ScanService`, with real-time progress and log tracking.
+- **Streaming Pipeline**: Leveraging `SXSSFWorkbook` and `ReportController` to stream discovery data directly from PostgreSQL to HTTP response.
+- **Schema Management**: Liquibase-driven versioning with standardized `tb_config_*` table structures and dynamic partition creation.
 
 ### Database (PostgreSQL)
 - **Composite Primary Keys**: Optimized for partitioned queries.
