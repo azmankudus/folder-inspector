@@ -17,7 +17,7 @@ type ScanHistory = {
   logPath?: string
 };
 
-const fetchHistories = async () => api.get("/scan/job");
+const fetchHistories = async () => api.get("/job");
 
 export default function ScanHistoryView() {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export default function ScanHistoryView() {
   const [logModalOpen, setLogModalOpen] = createSignal<ScanHistory | null>(null);
   const [logs] = createResource(logModalOpen, async (job) => {
     try {
-      return await api.get(`/scan/job/${job.id}/logs`);
+      return await api.get(`/job/${job.id}/logs`);
     } catch (e) {
       return [];
     }
@@ -43,14 +43,14 @@ export default function ScanHistoryView() {
   const [logFileModalOpen, setLogFileModalOpen] = createSignal<ScanHistory | null>(null);
   const [logFileContent] = createResource(logFileModalOpen, async (job) => {
     try {
-      return await api.get(`/scan/job/${job.id}/log-file`);
+      return await api.get(`/job/${job.id}/log-file`);
     } catch (e: any) {
       return `Error loading log file: ${e.message}`;
     }
   });
   const [exceptions] = createResource(exceptionModalOpen, async (job) => {
     try {
-      return await api.get(`/scan/job/${job.id}/exceptions`);
+      return await api.get(`/job/${job.id}/exceptions`);
     } catch (e) {
       return [];
     }
@@ -71,7 +71,7 @@ export default function ScanHistoryView() {
 
   const handleExport = async (historyId: number, includeData: boolean) => {
     try {
-      const endpoint = `/explorer/${historyId}/export/xlsx?scope=all&includeData=${includeData}`;
+      const endpoint = `/list/${historyId}/export/xlsx?scope=all&includeData=${includeData}`;
       const blob = await api.download(endpoint);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

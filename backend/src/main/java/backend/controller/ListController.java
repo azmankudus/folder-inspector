@@ -33,15 +33,15 @@ import io.micronaut.http.annotation.QueryValue;
 * Controller for exploring file structures and exporting discovery data.
 * Supports paginated views and streaming exports.
 */
-@Controller("/explorer")
-public class ExplorerController {
-  private static final Logger LOG = LoggerFactory.getLogger(ExplorerController.class);
+@Controller("/list")
+public class ListController {
+  private static final Logger LOG = LoggerFactory.getLogger(ListController.class);
 
   private final ItemRepository itemRepo;
   private final ItemAclRepository itemAclRepo;
   private final SecurityService securityService;
 
-  public ExplorerController(ItemRepository itemRepo,
+  public ListController(ItemRepository itemRepo,
       ItemAclRepository itemAclRepo,
       JobRepository jobRepo,
       ScanConfigRepository scanConfigRepo,
@@ -55,7 +55,7 @@ public class ExplorerController {
     this.securityService = securityService;
   }
 
-  @Secured({ "API_EXPLORER_ALL", "API_EXPLORER_RESTRICTED" })
+  @Secured({ "API_LIST_ALL", "API_LIST_RESTRICTED" })
   @Get("/{jobId}{?showAll}")
   public Page<Item> getFiles(Long jobId, Pageable pageable, @QueryValue(defaultValue = "false") boolean showAll) {
     if (pageable == null)
@@ -68,8 +68,8 @@ public class ExplorerController {
       return Page.empty();
     }
 
-    boolean userToggleAll = showAll && auth.getRoles().contains("API_EXPLORER_ALL");
-    LOG.debug("Explorer access - historyId: {}, showAll: {}, hasPermission: {}", jobId, showAll, userToggleAll);
+    boolean userToggleAll = showAll && auth.getRoles().contains("API_LIST_ALL");
+    LOG.debug("List access - historyId: {}, showAll: {}, hasPermission: {}", jobId, showAll, userToggleAll);
 
     if (userToggleAll) {
       return itemRepo.findByJobId(jobId, pageable);
@@ -78,7 +78,7 @@ public class ExplorerController {
     }
   }
 
-  @Secured({ "API_EXPLORER_ALL", "API_EXPLORER_RESTRICTED" })
+  @Secured({ "API_LIST_ALL", "API_LIST_RESTRICTED" })
   @Get("/{fileId}/acl")
   public Iterable<ItemAcl> getAcls(Long fileId) {
     LOG.trace("Fetching ACLs for file ID: {}", fileId);

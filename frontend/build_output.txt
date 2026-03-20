@@ -1,0 +1,54 @@
+
+> build
+> vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 16 modules transformed.
+✗ Build failed in 669ms
+error during build:
+[solid] /home/U00240012/Workspaces/vibe/folder-inspector/frontend/src/components/AppLayout.tsx: Missing semicolon. (3:247)
+
+  1 | import { JSX, Show } from "solid-js";
+  2 | import { A, useLocation, useNavigate } from "@solidjs/router";
+> 3 | import { FaSolidFolderOpen, FaSolidUser, FaSolidRightFromBracket, FaSolidNetworkWired, FaSolidSatelliteDish, FaSolidFolderTree, FaSolidClockRotateLeft, FaSolidFolder, FaSolidDatabase, FaSolidFileInvoice } from "solid-icons/FaSolidChartPie } from "solid-icons/fa";
+    |                                                                                                                                                                                                                                                        ^
+  4 | import { removeToken } from "~/lib/api";
+  5 | import { store } from "~/lib/store";
+  6 |
+file: /home/U00240012/Workspaces/vibe/folder-inspector/frontend/src/components/AppLayout.tsx:3:247
+    at constructor (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+    at TypeScriptParserMixin.raise (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+    at TypeScriptParserMixin.semicolon (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:6895:10)
+    at TypeScriptParserMixin.parseImportSourceAndAttributes (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:14253:10)
+    at TypeScriptParserMixin.parseImportSpecifiersAndAfter (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:14244:17)
+    at TypeScriptParserMixin.parseImport (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:14235:17)
+    at TypeScriptParserMixin.parseImport (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:9353:26)
+    at TypeScriptParserMixin.parseStatementContent (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:12876:27)
+    at TypeScriptParserMixin.parseStatementContent (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:12767:17)
+    at TypeScriptParserMixin.parseModuleItem (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:12744:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:13316:36)
+    at TypeScriptParserMixin.parseBlockBody (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:13309:10)
+    at TypeScriptParserMixin.parseProgram (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:12622:10)
+    at TypeScriptParserMixin.parseTopLevel (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:12612:25)
+    at TypeScriptParserMixin.parse (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:14488:25)
+    at TypeScriptParserMixin.parse (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:10126:18)
+    at parse (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/parser/lib/index.js:14522:38)
+    at parser (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at normalizeFile (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at normalizeFile.next (<anonymous>)
+    at run (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at run.next (<anonymous>)
+    at transform (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/core/lib/transform.js:22:33)
+    at transform.next (<anonymous>)
+    at step (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:261:32)
+    at /home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:223:11)
+    at /home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:189:28
+    at /home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+    at /home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:113:33
+    at step (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:287:14)
+    at /home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/U00240012/Workspaces/vibe/folder-inspector/frontend/node_modules/gensync/index.js:223:11)

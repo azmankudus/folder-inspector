@@ -24,4 +24,9 @@ public interface JobRepository extends CrudRepository<Job, Long> {
     java.util.List<Job> findByStatus(String status);
 
     java.util.List<Job> findByScanConfigId(Long scanConfigId);
+
+    @io.micronaut.data.annotation.Query("""
+        SELECT * FROM tb_job WHERE scan_config_id = :scanConfigId AND status = 'COMPLETED' ORDER BY finish_time DESC LIMIT 1
+    """)
+    java.util.Optional<Job> findTopByScanConfigIdOrderByFinishTimeDesc(Long scanConfigId);
 }

@@ -67,23 +67,27 @@ public class DataInit {
     Permission jobStart = getOrCreatePermission("API_JOB_START");
     Permission jobStop = getOrCreatePermission("API_JOB_STOP");
 
-    // ExplorerController permissions
-    Permission explorerViewAll = getOrCreatePermission("API_EXPLORER_ALL");
-    Permission explorerViewRestricted = getOrCreatePermission("API_EXPLORER_RESTRICTED");
+    // ListController permissions
+    Permission listViewAll = getOrCreatePermission("API_LIST_ALL");
+    Permission listViewRestricted = getOrCreatePermission("API_LIST_RESTRICTED");
 
     // SqlController permissions
     Permission sqlListTables = getOrCreatePermission("API_SQL_LIST_TABLES");
     Permission sqlExecute = getOrCreatePermission("API_SQL_EXECUTE");
 
     // UI-only permissions
-    Permission viewExplorer = getOrCreatePermission("UI_EXPLORER_VIEW");
+    Permission viewList = getOrCreatePermission("UI_LIST_VIEW");
     Permission viewJob = getOrCreatePermission("UI_JOB_VIEW");
     Permission viewScanConfig = getOrCreatePermission("UI_SCANCONFIG_VIEW");
     Permission viewDirectoryConfig = getOrCreatePermission("UI_DIRECTORYCONFIG_VIEW");
     Permission viewServerConfig = getOrCreatePermission("UI_SERVERCONFIG_VIEW");
     Permission viewSql = getOrCreatePermission("UI_SQL_VIEW");
     Permission viewReport = getOrCreatePermission("UI_REPORT_VIEW");
-    Permission explorerToggleAll = getOrCreatePermission("UI_EXPLORER_TOGGLE");
+    Permission listToggleAll = getOrCreatePermission("UI_LIST_TOGGLE");
+
+    // Dashboard permissions
+    Permission dashboardView = getOrCreatePermission("API_DASHBOARD_VIEW");
+    Permission uiDashboardView = getOrCreatePermission("UI_DASHBOARD_VIEW");
 
     // Create roles
     Role adminRole = getOrCreateRole("ADMIN");
@@ -110,36 +114,40 @@ public class DataInit {
 
     getOrCreateRolePermission(adminRole.id(), jobRead.id());
 
-    getOrCreateRolePermission(adminRole.id(), explorerViewAll.id());
-    getOrCreateRolePermission(adminRole.id(), explorerViewRestricted.id());
+    getOrCreateRolePermission(adminRole.id(), listViewAll.id());
+    getOrCreateRolePermission(adminRole.id(), listViewRestricted.id());
     getOrCreateRolePermission(adminRole.id(), reportViewAll.id());
 
     getOrCreateRolePermission(adminRole.id(), sqlListTables.id());
     getOrCreateRolePermission(adminRole.id(), sqlExecute.id());
 
-    getOrCreateRolePermission(adminRole.id(), viewExplorer.id());
+    getOrCreateRolePermission(adminRole.id(), viewList.id());
     getOrCreateRolePermission(adminRole.id(), viewJob.id());
     getOrCreateRolePermission(adminRole.id(), viewScanConfig.id());
     getOrCreateRolePermission(adminRole.id(), viewDirectoryConfig.id());
     getOrCreateRolePermission(adminRole.id(), viewServerConfig.id());
     getOrCreateRolePermission(adminRole.id(), viewSql.id());
     getOrCreateRolePermission(adminRole.id(), viewReport.id());
-    getOrCreateRolePermission(adminRole.id(), explorerToggleAll.id());
+    getOrCreateRolePermission(adminRole.id(), listToggleAll.id());
 
-    // MANAGER: read-only explorer + history
+    getOrCreateRolePermission(adminRole.id(), dashboardView.id());
+    getOrCreateRolePermission(adminRole.id(), uiDashboardView.id());
+    // MANAGER: read-only list + history
     getOrCreateRolePermission(managerRole.id(), reportViewAll.id());
-    getOrCreateRolePermission(managerRole.id(), explorerViewAll.id());
+    getOrCreateRolePermission(managerRole.id(), listViewAll.id());
     getOrCreateRolePermission(managerRole.id(), jobRead.id());
-    getOrCreateRolePermission(managerRole.id(), viewExplorer.id());
+    getOrCreateRolePermission(managerRole.id(), viewList.id());
     getOrCreateRolePermission(managerRole.id(), viewJob.id());
     getOrCreateRolePermission(managerRole.id(), viewReport.id());
-    getOrCreateRolePermission(managerRole.id(), explorerToggleAll.id());
+    getOrCreateRolePermission(managerRole.id(), listToggleAll.id());
 
-    // USER: restricted explorer only
+    getOrCreateRolePermission(managerRole.id(), dashboardView.id());
+    getOrCreateRolePermission(managerRole.id(), uiDashboardView.id());
+    // USER: restricted list only
     getOrCreateRolePermission(userRole.id(), reportViewRestricted.id());
-    getOrCreateRolePermission(userRole.id(), explorerViewRestricted.id());
+    getOrCreateRolePermission(userRole.id(), listViewRestricted.id());
     getOrCreateRolePermission(userRole.id(), jobRead.id());
-    getOrCreateRolePermission(userRole.id(), viewExplorer.id());
+    getOrCreateRolePermission(userRole.id(), viewList.id());
     getOrCreateRolePermission(userRole.id(), viewReport.id());
 
     // Create default users

@@ -8,7 +8,7 @@ export default function Index() {
 
   createEffect(() => {
     if (getToken()) {
-      navigate("/explorer");
+      navigate("/dashboard");
     }
   });
 

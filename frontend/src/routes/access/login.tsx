@@ -28,7 +28,7 @@ export default function Login() {
       const data = await res.json();
       setToken(data.access_token);
       store.setUser(getUserInfo());
-      navigate("/explorer");
+      navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

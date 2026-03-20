@@ -15,6 +15,8 @@
 - **Resilient Identity Resolution**: Resolves SIDs to human-readable names via LDAP (Active Directory) with built-in failover support.
 - **Discovery Report Engine**: New standalone module for generating historical scan reports with automated summaries and full data detail views.
 - **Streaming Export Engine**: Generate CSV and multi-million row Excel (XLSX) reports with constant memory usage.
+- **Historical Dashboard Analytics**: Caches user-level statistics to deliver instant time-based charting and metric evolution via Apache ECharts visualization.
+- **Admin Impersonation Mode**: Managers and administrators can seamlessly proxy into any user's profile layout to inspect isolated access privileges dynamically.
 - **Dynamic Partitioning**: Uses PostgreSQL table partitioning (by Scan Profile) for high-performance data isolation and rapid cleanup.
 - **Premium UI**: Reactive dashboard built with SolidJS and Solid Store for a smooth, state-of-the-art user experience.
 - **Secure by Design**: JWT-based authentication, role-based access control (RBAC), and granular API permissions (`API_REPORT_ALL`, `API_REPORT_RESTRICTED`).

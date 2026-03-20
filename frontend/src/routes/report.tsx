@@ -14,7 +14,8 @@ import {
   FaSolidHourglassHalf,
   FaSolidCheckCircle,
   FaSolidTimesCircle,
-  FaSolidChevronDown
+  FaSolidChevronDown,
+  FaSolidInfoCircle
 } from "solid-icons/fa";
 import { api, getToken } from "~/lib/api";
 import AppLayout from "~/components/AppLayout";
@@ -57,25 +58,26 @@ type ScanItem = {
 export default function ReportPage() {
   const navigate = useNavigate();
   const [selectedJobId, setSelectedJobId] = createSignal<number | null>(null);
+  const [viewType, setViewType] = createSignal<number>(1);
 
   if (globalThis.window !== undefined && !getToken()) {
     setTimeout(() => navigate("/access/login", { replace: true }), 0);
   }
 
   const [histories] = createResource(async () => {
-    const data = await api.get("/scan/job");
+    const data = await api.get("/job");
     return (data || []).filter((h: any) => h.status === 'COMPLETED').sort((a: any, b: any) => b.id - a.id);
   });
 
   const [job] = createResource(selectedJobId, async (id) => {
     if (!id) return null;
-    return await api.get(`/scan/job/${id}`);
+    return await api.get(`/job/${id}`);
   });
 
   const [exceptions] = createResource(selectedJobId, async (id) => {
     if (!id) return [];
     try {
-      return await api.get(`/scan/job/${id}/exceptions`);
+      return await api.get(`/job/${id}/exceptions`);
     } catch (e) {
       return [];
     }
@@ -163,69 +165,77 @@ export default function ReportPage() {
 
         {/* Top Context Selector */}
         <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-between gap-6 bg-[#161616] border border-zinc-800 rounded-xl p-4 shadow-xl">
-            <div class="flex items-center gap-4 flex-1">
-              <span class="text-xs font-black text-zinc-500 uppercase tracking-widest whitespace-nowrap">Execution Run:</span>
-              <select
-                class="bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-200 text-sm w-full max-w-md focus:border-amber-500 outline-none transition-all cursor-pointer"
-                value={selectedJobId() || ""}
-                onChange={(e) => {
-                  setSelectedJobId(parseInt(e.currentTarget.value));
-                  setPage(0);
-                }}
-              >
-                <option value="" disabled>-- Select a Successful Scan --</option>
+          <div class="flex items-center gap-4 w-full">
+            <span class="text-sm font-semibold text-zinc-300 whitespace-nowrap">Select Scan:</span>
+            <select
+              class="bg-[#161616] border border-zinc-700 rounded-lg px-4 py-2 text-zinc-200 text-sm w-full focus:border-amber-500 outline-none transition-all cursor-pointer"
+              value={selectedJobId() || ""}
+              onChange={(e) => {
+                setSelectedJobId(parseInt(e.currentTarget.value));
+                setPage(0);
+              }}
+            >
+              <option value="" disabled>-- Choose a past scan --</option>
+              <Show when={histories()}>
                 <For each={histories()}>
                   {(h: any) => (
                     <option value={h.id}>
-                      Run #{h.id} - {h.hostname} ({new Date(h.startTime).toLocaleDateString()})
+                      {h.id} - {h.hostname} - {h.rootPath}
                     </option>
                   )}
                 </For>
-              </select>
-            </div>
-
-            <Show when={selectedJobId()}>
-              <div class="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => handleExport(false)}
-                  class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg flex items-center gap-2 transition-all border border-zinc-700 text-xs font-bold"
-                  title="Export Summary XLSX"
-                >
-                  <FaSolidDownload class="text-amber-500 text-[10px]" /> SUMMARY
-                </button>
-                <button
-                  onClick={() => handleExport(true)}
-                  class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-blue-500/10 text-xs font-bold"
-                  title="Export Full XLSX with Data"
-                >
-                  <FaSolidDownload class="text-[10px]" /> FULL DATA
-                </button>
-              </div>
-            </Show>
+              </Show>
+            </select>
           </div>
 
           <Show when={job()}>
             {(j) => (
-              <div class="flex items-center gap-8 p-4 bg-zinc-900/40 rounded-xl border border-zinc-800/60 animate-in fade-in slide-in-from-top-2 duration-300 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none"></div>
-                <div class="flex items-center gap-2 border-r border-zinc-800 pr-6 mr-2">
-                  <FaSolidFileInvoice class="text-amber-500 text-sm" />
-                  <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">Discovery Metrics</span>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-6 mt-2 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div class="flex items-center gap-2">
+                    <FaSolidInfoCircle class="text-amber-500 text-sm" />
+                    <span class="text-xs font-bold text-zinc-500 uppercase tracking-widest leading-none">Scan Details:</span>
+                  </div>
+                  <div class="flex gap-8">
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Storage Host</span>
+                      <span class="text-sm text-zinc-200 font-medium">{j().hostname || 'N/A'}</span>
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Target Path</span>
+                      <span class="text-sm text-amber-500 font-mono font-medium">{j().rootPath || 'N/A'}</span>
+                    </div>
+                  </div>
                 </div>
+                
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1 bg-[#161616]/50 p-1 rounded-xl border border-zinc-800/80 w-fit">
+                    {[1, 2, 3].map((t) => (
+                      <button
+                        onClick={() => setViewType(t)}
+                        class={`px-8 py-2 rounded-lg text-xs font-bold transition-all ${viewType() === t ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'}`}
+                      >
+                        Type {t}
+                      </button>
+                    ))}
+                  </div>
 
-                <div class="flex flex-wrap gap-x-10 gap-y-2 flex-1">
-                  <MetricItem label="Storage Point" value={j().hostname} />
-                  <MetricItem label="Scan Scope" value={j().rootPath} highlight />
-                  <MetricItem label="Credentials" value={j().username} />
-                  <MetricItem label="Execution Time" value={formatDate(j().startTime)} />
-                  <MetricItem label="Performance" value={getDuration(j().startTime, j().finishTime)} />
-                </div>
-
-                <div class="flex items-center gap-3 border-l border-zinc-800 pl-8 ml-auto">
-                    <span class={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${j().status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
-                      {j().status}
-                    </span>
+                  <div class="relative group/export">
+                    <button class="text-xs px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors border border-zinc-700 font-bold flex items-center gap-2">
+                      <FaSolidDownload class="text-zinc-500" /> Export Report Options <FaSolidChevronDown class="text-[10px] text-zinc-500 ml-1 group-hover/export:rotate-180 transition-transform" />
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 w-56 bg-[#161616] border border-zinc-700 rounded-lg shadow-xl hidden group-hover/export:block z-50 overflow-hidden">
+                      <div class="p-1">
+                        <button onClick={() => handleExport(false)} class="w-full text-left px-4 py-2 text-xs font-bold text-amber-400 hover:bg-zinc-800 rounded flex items-center gap-2">
+                          SUMMARY
+                        </button>
+                        <div class="h-px bg-zinc-800 my-1"></div>
+                        <button onClick={() => handleExport(true)} class="w-full text-left px-4 py-2 text-xs font-bold text-blue-400 hover:bg-zinc-800 rounded flex items-center gap-2">
+                          FULL DATA
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -247,8 +257,10 @@ export default function ReportPage() {
         <Suspense fallback={<div class="py-20 text-center text-zinc-500"><FaSolidSpinner class="animate-spin text-3xl mx-auto mb-4" /> Loading report data...</div>}>
           <Show when={job()}>
             {(j) => (
-              <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Show when={viewType() === 1}>
                 {/* section 1: SCAN SUMMARY */}
+                <div class="space-y-8">
                 <div class="bg-[#111111] border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
                   <div class="px-6 py-4 bg-[#161616] border-b border-zinc-800 flex items-center gap-3">
                     <FaSolidFileInvoice class="text-amber-500 text-xl" />
@@ -391,6 +403,44 @@ export default function ReportPage() {
                     </button>
                   </div>
                 </div>
+                </div>
+                </Show>
+
+                <Show when={viewType() === 2}>
+                  <div class="py-40 text-center space-y-6 bg-[#111111]/80 border-2 border-dashed border-zinc-800 rounded-3xl animate-in zoom-in duration-300">
+                    <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20 shadow-2xl shadow-emerald-500/5">
+                      <FaSolidFileInvoice class="text-emerald-500 text-3xl" />
+                    </div>
+                    <div class="space-y-2">
+                      <h3 class="text-2xl font-black text-white tracking-tight">Report View: Type 2</h3>
+                      <p class="text-zinc-500 text-sm max-w-sm mx-auto">This dashboard is currently under development. Type 2 will focus on multi-dimensional data visualization and custom audit filters.</p>
+                    </div>
+                    <div class="pt-4 flex justify-center">
+                       <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-black text-amber-500 uppercase tracking-widest">
+                         <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+                         In Progress
+                       </div>
+                    </div>
+                  </div>
+                </Show>
+
+                <Show when={viewType() === 3}>
+                  <div class="py-40 text-center space-y-6 bg-[#111111]/80 border-2 border-dashed border-zinc-800 rounded-3xl animate-in zoom-in duration-300">
+                    <div class="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto border border-blue-500/20 shadow-2xl shadow-blue-500/5">
+                      <FaSolidShieldHalved class="text-blue-500 text-3xl" />
+                    </div>
+                    <div class="space-y-2">
+                      <h3 class="text-2xl font-black text-white tracking-tight">Report View: Type 3</h3>
+                      <p class="text-zinc-500 text-sm max-w-sm mx-auto">Analytical summary of permission hierarchies and ownership trends will be displayed here in future releases.</p>
+                    </div>
+                     <div class="pt-4 flex justify-center">
+                       <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-black text-blue-500 uppercase tracking-widest">
+                         <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                         Coming Soon
+                       </div>
+                    </div>
+                  </div>
+                </Show>
               </div>
             )}
           </Show>

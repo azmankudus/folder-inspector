@@ -10,7 +10,7 @@ type FileNode = { id: number, name: string, path: string, nodeType: string, size
 type Page<T> = { content: T[], totalSize: number, totalPages: number, numberOfElements: number, size: number, pageNumber: number };
 type FileAcl = { id: number, itemId: number, principal: string, inheritanceType: string, canView: boolean, canAdd: boolean, canEdit: boolean, canRemove: boolean };
 
-const fetchHistories = async () => api.get("/scan/job");
+const fetchHistories = async () => api.get("/job");
 
 export default function FilesView() {
   const navigate = useNavigate();
@@ -37,13 +37,13 @@ export default function FilesView() {
       return { historyId: h, page: page(), size: rowsPerPage(), all: showAll() };
     },
     async ({ historyId, page, size, all }) => {
-      return api.get(`/explorer/${historyId}?page=${page}&size=${size}&showAll=${all}`) as Promise<Page<FileNode>>;
+      return api.get(`/list/${historyId}?page=${page}&size=${size}&showAll=${all}`) as Promise<Page<FileNode>>;
     }
   );
 
   const [selectedFileForAcl, setSelectedFileForAcl] = createSignal<number | null>(null);
   const [acls] = createResource(() => selectedFileForAcl(), async (fileId) => {
-    return api.get(`/explorer/${fileId}/acl`);
+    return api.get(`/list/${fileId}/acl`);
   });
 
   const totalPages = () => files()?.totalPages || 0;
@@ -54,7 +54,7 @@ export default function FilesView() {
     if (!historyId) return alert("Select a scan first");
 
     try {
-      const endpoint = `/explorer/${historyId}/export/${format}?scope=${scope}&page=${page()}&size=${rowsPerPage()}&showAll=${showAll()}`;
+      const endpoint = `/list/${historyId}/export/${format}?scope=${scope}&page=${page()}&size=${rowsPerPage()}&showAll=${showAll()}`;
       const blob = await api.download(endpoint);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -80,7 +80,7 @@ export default function FilesView() {
   };
 
   return (
-    <AppLayout title="Explorer">
+    <AppLayout title="List">
       <div class="flex flex-col gap-6">
 
         {/* Top Context Selector */}
@@ -127,7 +127,7 @@ export default function FilesView() {
               <FaSolidFolder class="text-zinc-400" /> Discovered Files & Folders
             </h2>
             <div class="flex items-center gap-4">
-              <Show when={store.state.user?.roles.includes('UI_EXPLORER_TOGGLE')}>
+              <Show when={store.state.user?.roles.includes('UI_LIST_TOGGLE')}>
                 <div class="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 px-3 py-1.5 rounded-lg">
                   <label class="relative inline-flex items-center cursor-pointer scale-90">
                     <input

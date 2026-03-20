@@ -1,472 +1,547 @@
 databaseChangeLog:
-  - changeSet:
-      id: v1-init
-      author: antigravity
-      validCheckSum:
-        - "9:865679cfa3320c14befdb63a464a5666"
-        - "9:614d72f485e3587eefb399f0e641fa29"
-      changes:
-        - createTable:
-            tableName: tb_config_server
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: protocol
-                  type: VARCHAR(255)
-              - column:
-                  name: host
-                  type: VARCHAR(255)
-              - column:
-                  name: port
-                  type: INT
-              - column:
-                  name: username
-                  type: VARCHAR(255)
-              - column:
-                  name: password
-                  type: VARCHAR(255)
+    - changeSet:
+          id: v1-init
+          author: antigravity
+          validCheckSum:
+              - "9:865679cfa3320c14befdb63a464a5666"
+              - "9:614d72f485e3587eefb399f0e641fa29"
+          changes:
+              - createTable:
+                    tableName: tb_config_server
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: protocol
+                              type: VARCHAR(255)
+                        - column:
+                              name: host
+                              type: VARCHAR(255)
+                        - column:
+                              name: port
+                              type: INT
+                        - column:
+                              name: username
+                              type: VARCHAR(255)
+                        - column:
+                              name: password
+                              type: VARCHAR(255)
 
-        - createTable:
-            tableName: tb_config_directory
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: ad_host
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: ad_port
-                  type: INT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: ad_backup_host
-                  type: VARCHAR(255)
-              - column:
-                  name: ad_backup_port
-                  type: INT
-              - column:
-                  name: ad_username
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: ad_password
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_config_directory
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: ad_host
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: ad_port
+                              type: INT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: ad_backup_host
+                              type: VARCHAR(255)
+                        - column:
+                              name: ad_backup_port
+                              type: INT
+                        - column:
+                              name: ad_username
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: ad_password
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_config_scan
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: server_config_id
-                  type: BIGINT
-              - column:
-                  name: root_path
-                  type: VARCHAR(255)
-              - column:
-                  name: scheduler_cron
-                  type: VARCHAR(255)
+              - createTable:
+                    tableName: tb_config_scan
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: server_config_id
+                              type: BIGINT
+                        - column:
+                              name: root_path
+                              type: VARCHAR(255)
+                        - column:
+                              name: scheduler_cron
+                              type: VARCHAR(255)
 
-        - createTable:
-            tableName: tb_job
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: scan_config_id
-                  type: BIGINT
-              - column:
-                  name: status
-                  type: VARCHAR(50)
-              - column:
-                  name: progress
-                  type: INT
-              - column:
-                  name: start_time
-                  type: TIMESTAMPTZ
-              - column:
-                  name: finish_time
-                  type: TIMESTAMPTZ
-              - column:
-                  name: process_id
-                  type: BIGINT
-              - column:
-                  name: log_path
-                  type: VARCHAR(255)
-              - column:
-                  name: total_files
-                  type: BIGINT
-              - column:
-                  name: total_folders
-                  type: BIGINT
-              - column:
-                  name: total_exceptions
-                  type: BIGINT
+              - createTable:
+                    tableName: tb_job
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: scan_config_id
+                              type: BIGINT
+                        - column:
+                              name: status
+                              type: VARCHAR(50)
+                        - column:
+                              name: progress
+                              type: INT
+                        - column:
+                              name: start_time
+                              type: TIMESTAMPTZ
+                        - column:
+                              name: finish_time
+                              type: TIMESTAMPTZ
+                        - column:
+                              name: process_id
+                              type: BIGINT
+                        - column:
+                              name: log_path
+                              type: VARCHAR(255)
+                        - column:
+                              name: total_files
+                              type: BIGINT
+                        - column:
+                              name: total_folders
+                              type: BIGINT
+                        - column:
+                              name: total_exceptions
+                              type: BIGINT
 
-        - createTable:
-            tableName: tb_item
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: job_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: parent_id
-                  type: BIGINT
-              - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: path
-                  type: TEXT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: node_type
-                  type: VARCHAR(10)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: size_bytes
-                  type: BIGINT
-              - column:
-                  name: last_modified
-                  type: TIMESTAMPTZ
-                  constraints:
-                    nullable: false
-              - column:
-                  name: owner_sid
-                  type: VARCHAR(255)
-              - column:
-                  name: owner_name
-                  type: VARCHAR(255)
-              - column:
-                  name: group_sid
-                  type: VARCHAR(255)
-              - column:
-                  name: group_name
-                  type: VARCHAR(255)
-              - column:
-                  name: scan_profile_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_item
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: job_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: parent_id
+                              type: BIGINT
+                        - column:
+                              name: name
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: path
+                              type: TEXT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: node_type
+                              type: VARCHAR(10)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: size_bytes
+                              type: BIGINT
+                        - column:
+                              name: last_modified
+                              type: TIMESTAMPTZ
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: owner_sid
+                              type: VARCHAR(255)
+                        - column:
+                              name: owner_name
+                              type: VARCHAR(255)
+                        - column:
+                              name: group_sid
+                              type: VARCHAR(255)
+                        - column:
+                              name: group_name
+                              type: VARCHAR(255)
+                        - column:
+                              name: scan_profile_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_item_acl
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: item_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: principal
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: inheritance_type
-                  type: VARCHAR(50)
-              - column:
-                  name: can_view
-                  type: BOOLEAN
-              - column:
-                  name: can_add
-                  type: BOOLEAN
-              - column:
-                  name: can_edit
-                  type: BOOLEAN
-              - column:
-                  name: can_remove
-                  type: BOOLEAN
+              - createTable:
+                    tableName: tb_item_acl
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: item_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: principal
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: inheritance_type
+                              type: VARCHAR(50)
+                        - column:
+                              name: can_view
+                              type: BOOLEAN
+                        - column:
+                              name: can_add
+                              type: BOOLEAN
+                        - column:
+                              name: can_edit
+                              type: BOOLEAN
+                        - column:
+                              name: can_remove
+                              type: BOOLEAN
 
-        - createTable:
-            tableName: tb_job_log
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: job_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: log_level
-                  type: VARCHAR(10)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: message
-                  type: TEXT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: timestamp
-                  type: TIMESTAMPTZ
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_job_log
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: job_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: log_level
+                              type: VARCHAR(10)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: message
+                              type: TEXT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: timestamp
+                              type: TIMESTAMPTZ
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_job_exception
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: job_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: level
-                  type: VARCHAR(10)
-              - column:
-                  name: path
-                  type: TEXT
-              - column:
-                  name: message
-                  type: TEXT
-              - column:
-                  name: reason
-                  type: VARCHAR(50)
-              - column:
-                  name: note
-                  type: TEXT
-              - column:
-                  name: timestamp
-                  type: TIMESTAMPTZ
-                  defaultValueComputed: NOW()
-                  constraints:
-                    nullable: true
+              - createTable:
+                    tableName: tb_job_exception
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: job_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: level
+                              type: VARCHAR(10)
+                        - column:
+                              name: path
+                              type: TEXT
+                        - column:
+                              name: message
+                              type: TEXT
+                        - column:
+                              name: reason
+                              type: VARCHAR(50)
+                        - column:
+                              name: note
+                              type: TEXT
+                        - column:
+                              name: timestamp
+                              type: TIMESTAMPTZ
+                              defaultValueComputed: NOW()
+                              constraints:
+                                  nullable: true
 
-        - createTable:
-            tableName: tb_directory_cache
-            columns:
-              - column:
-                  name: sid
-                  type: VARCHAR(255)
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: resolution_name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_directory_cache
+                    columns:
+                        - column:
+                              name: sid
+                              type: VARCHAR(255)
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: resolution_name
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_access_user
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: username
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: password
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_access_user
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: username
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                                  unique: true
+                        - column:
+                              name: password
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_access_role
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-                    unique: true
+              - createTable:
+                    tableName: tb_access_role
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: name
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                                  unique: true
 
-        - createTable:
-            tableName: tb_access_permission
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-                    unique: true
+              - createTable:
+                    tableName: tb_access_permission
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: name
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                                  unique: true
 
-        - createTable:
-            tableName: tb_access_user_role
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: user_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: role_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_access_user_role
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: user_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: role_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
 
-        - createTable:
-            tableName: tb_access_role_permission
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: role_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: permission_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
+              - createTable:
+                    tableName: tb_access_role_permission
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: role_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: permission_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
 
-        - createIndex:
-            tableName: tb_item
-            indexName: idx_tb_item_job_id
-            columns:
-              - column:
-                  name: job_id
-        - createIndex:
-            tableName: tb_item_acl
-            indexName: idx_tb_item_acl_item_id
-            columns:
-              - column:
-                  name: item_id
-        - createIndex:
-            tableName: tb_job_log
-            indexName: idx_tb_job_log_job_id
-            columns:
-              - column:
-                  name: job_id
-        - createIndex:
-            tableName: tb_job_exception
-            indexName: idx_tb_job_exception_job_id
-            columns:
-              - column:
-                  name: job_id
+              - createIndex:
+                    tableName: tb_item
+                    indexName: idx_tb_item_job_id
+                    columns:
+                        - column:
+                              name: job_id
+              - createIndex:
+                    tableName: tb_item_acl
+                    indexName: idx_tb_item_acl_item_id
+                    columns:
+                        - column:
+                              name: item_id
+              - createIndex:
+                    tableName: tb_job_log
+                    indexName: idx_tb_job_log_job_id
+                    columns:
+                        - column:
+                              name: job_id
+              - createIndex:
+                    tableName: tb_job_exception
+                    indexName: idx_tb_job_exception_job_id
+                    columns:
+                        - column:
+                              name: job_id
 
-  - changeSet:
-      id: v2-add-timestamp-to-job-exception
-      author: antigravity
-      changes:
-        - addColumn:
-            tableName: tb_job_exception
-            columns:
-              - column:
-                  name: timestamp
-                  type: TIMESTAMPTZ
-                  defaultValueComputed: NOW()
-                  constraints:
-                    nullable: true
-      preConditions:
-        - onFail: MARK_RAN
-        - not:
-            - columnExists:
-                tableName: tb_job_exception
-                columnName: timestamp
-  - changeSet:
-      id: v3-convert-timestamps-to-timestamptz
-      author: antigravity
-      changes:
-        - modifyDataType:
-            tableName: tb_job
-            columnName: start_time
-            newDataType: TIMESTAMPTZ
-        - modifyDataType:
-            tableName: tb_job
-            columnName: finish_time
-            newDataType: TIMESTAMPTZ
-        - modifyDataType:
-            tableName: tb_item
-            columnName: last_modified
-            newDataType: TIMESTAMPTZ
-        - modifyDataType:
-            tableName: tb_job_log
-            columnName: timestamp
-            newDataType: TIMESTAMPTZ
+    - changeSet:
+          id: v2-add-timestamp-to-job-exception
+          author: antigravity
+          changes:
+              - addColumn:
+                    tableName: tb_job_exception
+                    columns:
+                        - column:
+                              name: timestamp
+                              type: TIMESTAMPTZ
+                              defaultValueComputed: NOW()
+                              constraints:
+                                  nullable: true
+          preConditions:
+              - onFail: MARK_RAN
+              - not:
+                    - columnExists:
+                          tableName: tb_job_exception
+                          columnName: timestamp
+    - changeSet:
+          id: v3-convert-timestamps-to-timestamptz
+          author: antigravity
+          changes:
+              - modifyDataType:
+                    tableName: tb_job
+                    columnName: start_time
+                    newDataType: TIMESTAMPTZ
+              - modifyDataType:
+                    tableName: tb_job
+                    columnName: finish_time
+                    newDataType: TIMESTAMPTZ
+              - modifyDataType:
+                    tableName: tb_item
+                    columnName: last_modified
+                    newDataType: TIMESTAMPTZ
+              - modifyDataType:
+                    tableName: tb_job_log
+                    columnName: timestamp
+                    newDataType: TIMESTAMPTZ
+    - changeSet:
+          id: v4-user-job-stats
+          author: antigravity
+          changes:
+              - createTable:
+                    tableName: tb_user_job_stats
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                        - column:
+                              name: job_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: username
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: total_files
+                              type: BIGINT
+                              defaultValueNumeric: 0
+                        - column:
+                              name: total_folders
+                              type: BIGINT
+                              defaultValueNumeric: 0
+                        - column:
+                              name: owned_files
+                              type: BIGINT
+                              defaultValueNumeric: 0
+                        - column:
+                              name: total_read
+                              type: BIGINT
+                              defaultValueNumeric: 0
+                        - column:
+                              name: total_write
+                              type: BIGINT
+                              defaultValueNumeric: 0
+                        - column:
+                              name: total_execute
+                              type: BIGINT
+                              defaultValueNumeric: 0
+              - addUniqueConstraint:
+                    constraintName: ui_user_job_stats
+                    tableName: tb_user_job_stats
+                    columnNames: job_id, username
+              - addForeignKeyConstraint:
+                    constraintName: fk_user_job_stats_job
+                    baseTableName: tb_user_job_stats
+                    baseColumnNames: job_id
+                    referencedTableName: tb_job
+                    referencedColumnNames: id
+                    onDelete: CASCADE
+    - changeSet:
+          id: v5-rename-config-tables
+          author: antigravity
+          preConditions:
+              - onFail: MARK_RAN
+              - tableExists:
+                    tableName: tb_server_config
+          changes:
+              - renameTable:
+                    oldTableName: tb_server_config
+                    newTableName: tb_config_server
+              - renameTable:
+                    oldTableName: tb_directory_config
+                    newTableName: tb_config_directory
+              - renameTable:
+                    oldTableName: tb_scan_config
+                    newTableName: tb_config_scan

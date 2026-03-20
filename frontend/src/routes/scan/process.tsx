@@ -61,7 +61,7 @@ export default function ScanHistoryView() {
 
   const handleExport = async (historyId: number, includeData: boolean) => {
     try {
-      const endpoint = `/explorer/${historyId}/export/xlsx?scope=all&includeData=${includeData}`;
+      const endpoint = `/list/${historyId}/export/xlsx?scope=all&includeData=${includeData}`;
       const blob = await api.download(endpoint);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');

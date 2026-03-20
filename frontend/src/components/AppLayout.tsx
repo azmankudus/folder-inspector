@@ -1,6 +1,6 @@
 import { JSX, Show } from "solid-js";
 import { A, useLocation, useNavigate } from "@solidjs/router";
-import { FaSolidFolderOpen, FaSolidUser, FaSolidRightFromBracket, FaSolidNetworkWired, FaSolidSatelliteDish, FaSolidFolderTree, FaSolidClockRotateLeft, FaSolidFolder, FaSolidDatabase, FaSolidFileInvoice } from "solid-icons/fa";
+import { FaSolidFolderOpen, FaSolidUser, FaSolidRightFromBracket, FaSolidNetworkWired, FaSolidSatelliteDish, FaSolidFolderTree, FaSolidClockRotateLeft, FaSolidFolder, FaSolidDatabase, FaSolidFileInvoice, FaSolidChartPie } from "solid-icons/fa";
 import { removeToken } from "~/lib/api";
 import { store } from "~/lib/store";
 
@@ -28,10 +28,13 @@ export default function AppLayout(props: Readonly<{ children: JSX.Element; title
           </A>
 
           <nav class="hidden md:flex items-center gap-1">
-            <Show when={hasPerm('UI_EXPLORER_VIEW')}>
-              <TopNavItem href="/explorer" icon={<FaSolidFolder />} label="Explorer" isActive={location.pathname === "/explorer"} />
+            <Show when={hasPerm('UI_DASHBOARD_VIEW')}>
+              <TopNavItem href="/dashboard" icon={<FaSolidChartPie />} label="Dashboard" isActive={location.pathname === "/dashboard"} />
             </Show>
-            <Show when={hasPerm('UI_REPORT_VIEW') || hasPerm('UI_EXPLORER_VIEW')}>
+            <Show when={hasPerm('UI_LIST_VIEW')}>
+              <TopNavItem href="/list" icon={<FaSolidFolder />} label="List" isActive={location.pathname === "/list"} />
+            </Show>
+            <Show when={hasPerm('UI_REPORT_VIEW') || hasPerm('UI_LIST_VIEW')}>
               <TopNavItem href="/report" icon={<FaSolidFileInvoice />} label="Report" isActive={location.pathname === "/report"} />
             </Show>
             <Show when={hasPerm('UI_JOB_VIEW')}>
