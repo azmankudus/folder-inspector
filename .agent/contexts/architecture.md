@@ -1,16 +1,11 @@
 ---
-description: Application Architecture and Technology Stack
+description: Architecture overview, routing, and stack map
 ---
+# Application Architecture State
 
-# Folder Inspector Architecture
+Folder Inspector is a robust enterprise utility serving discovery streams from massive File Share networks directly into a responsive UI structure.
 
-## Core Technology Stack
-- **Backend**: Java 21 powered by Micronaut Framework
-- **Frontend**: SolidJS + Solid Start framework
-- **Database**: PostgreSQL 16
-- **Schema Management**: Liquibase
-
-## Business Logic
-- **Service Layer**: Decoupled domain implementations inside `backend.service.*`
-- **Security**: JWT-based stateless authentication (`spring-security` principles) relying exclusively on system-level `API_` tokens for strict RBAC decoupling.
-- **Reporting Engine**: Implements the Apache POI streaming pattern (`SXSSFWorkbook`) to compile unlimited size Auditing exports dynamically into an overarching multi-sheet canvas.
+- **Frontend**: Solid Start single-page application orchestrating ECharts graphics. Found in `/frontend`.
+- **Backend**: Micronaut REST services compiled natively. Found in `/backend`.
+- **Database Architecture**: PostgreSQL utilizing extensive table partitioning on legacy ACL footprints. 
+- **Migration Engine**: Liquibase orchestrations inside `changelog.yaml`. Agents must assert `preConditions` dynamically to safely bypass or rename schema discrepancies (e.g., legacy `tb_server` vs current `tb_config_server` implementations) without modifying hardcoded historical steps.
